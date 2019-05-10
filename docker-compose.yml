@@ -26,7 +26,7 @@ services:
             - mariadb
         labels:
             traefik.app.backend: booking
-            traefik.app.frontend.rule: HostRegexp:local.booking.{domain:[a-z.]+}
+            traefik.app.frontend.rule: HostRegexp:local.booking-workshop.{domain:[a-z.]+}
             traefik.app.port: "80"
     mariadb:
         image: mariadb
