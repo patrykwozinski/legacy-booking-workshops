@@ -1,6 +1,6 @@
 check: php-cs-fixer phpstan deptrac phpunit
 
-CONTAINER=docker-compose exec workshop_app
+CONTAINER=docker-compose exec booking_workshop_app
 
 php-cs-fixer:
 	${CONTAINER} ./vendor/bin/php-cs-fixer fix -vv
