@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+    workshop_booking_app:
+        container_name: workshop-booking-app
+        depends_on:
+            - mariadb
+        environment:
+            USER_ID: ${LOCAL_USER_ID}
+            GROUP_ID: ${LOCAL_GROUP_ID}
+            XDEBUG_HOST: ${XDEBUG_HOST}
+        env_file:
+            - .env
+            - .env.local
+        build:
+            dockerfile: Dockerfile
+            context: ./
+        volumes:
+            - "./:/var/www/html:cached"
+            - "./var/:/var/www/html/var:delegated"
+            - "./vendor/:/var/www/html/vendor:delegated"
+        restart: always
+        expose:
+            - "80"
+        links:
+            - mariadb
+        labels:
+            traefik.app.backend: booking
+            traefik.app.frontend.rule: HostRegexp:local.booking.{domain:[a-z.]+}
+            traefik.app.port: "80"
+    mariadb:
+        image: mariadb
+        env_file:
+            - .env
+            - .env.local
+        environment:
+            - MYSQL_ROOT_PASSWORD=example
+            - MYSQL_USER=mariadb
+            - MYSQL_PASSWORD=mariadb
+            - MYSQL_DATABASE=booking
+        ports:
+            - 3306:3306
+networks:
+    default:
+        external:
+            name: local
