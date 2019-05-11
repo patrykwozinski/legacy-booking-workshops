@@ -30,5 +30,7 @@ class BookingValidator
 		{
 			$failedBy[] = 'given date is from the past';
 		}
+
+		return implode(', ', $failedBy);
 	}
 }
