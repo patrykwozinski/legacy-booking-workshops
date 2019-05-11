@@ -23,6 +23,8 @@ class BookingController extends AbstractController
 			$request->get('patient')
 		);
 
+
+
 		/** @var BookingValidator $validator */
 		$validator     = $this->get(BookingValidator::class);
 		$bookingStatus = $validator->checkIfValid($booking);
