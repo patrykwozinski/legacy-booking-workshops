@@ -10,8 +10,8 @@ use App\SDK\AvailabilityApiClient\IO\Duration;
 
 final class AvailabilityApiClient
 {
-	public function getAvailabilityInformation(Doctor $doctor): Availability
+	public function getAvailabilityInformation(Doctor $doctor, \DateTimeImmutable $when): Availability
 	{
-		return new Availability(Duration::inMinutes(30));
+		return new Availability(Duration::inMinutes(30), true, $when);
 	}
 }
