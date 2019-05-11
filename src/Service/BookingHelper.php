@@ -7,6 +7,10 @@ class BookingHelper
 {
 	public function create(string $date, int $doctorId, ?string $patient): array
 	{
-
+		return [
+			'date' => new \DateTime($date),
+			'doctor' => '',
+			'patient' => $patient,
+		];
 	}
 }
