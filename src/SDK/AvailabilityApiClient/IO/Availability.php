@@ -9,12 +9,14 @@ final class Availability
 	private $duration;
 	private $exists;
 	private $startFrom;
+	private $isReserved;
 
-	public function __construct(Duration $duration, bool $exists, \DateTimeImmutable $startFrom)
+	public function __construct(Duration $duration, bool $exists, \DateTimeImmutable $startFrom, bool $isReserved)
 	{
-		$this->duration  = $duration;
-		$this->exists    = $exists;
-		$this->startFrom = $startFrom;
+		$this->duration   = $duration;
+		$this->exists     = $exists;
+		$this->startFrom  = $startFrom;
+		$this->isReserved = $isReserved;
 	}
 
 	public function duration(): Duration
@@ -30,5 +32,10 @@ final class Availability
 	public function startFrom(): \DateTimeImmutable
 	{
 		return $this->startFrom;
+	}
+
+	public function reserved(): bool
+	{
+		return $this->isReserved;
 	}
 }

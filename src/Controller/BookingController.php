@@ -26,7 +26,15 @@ class BookingController extends AbstractController
 
 		/** @var AvailabilityApiClient $availabilityApi */
 		$availabilityApi = $this->get(AvailabilityApiClient::class);
-		$availabilityApi->getAvailabilityInformation(new Doctor($doctorId), new \DateTimeImmutable($date));
+		$availability    = $availabilityApi->getAvailabilityInformation(
+			new Doctor($doctorId),
+			new \DateTimeImmutable($date)
+		);
+
+		if (false === $availability->exists() || $availability->reserved())
+		{
+			return new Response('Given date does not exists in calendar or is reserved');
+		}
 
 		/** @var BookingValidator $validator */
 		$validator     = $this->get(BookingValidator::class);
