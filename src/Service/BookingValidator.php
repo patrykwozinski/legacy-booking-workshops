@@ -11,7 +11,7 @@ class BookingValidator
 	 *
 	 * @return bool|string
 	 */
-	public function checkIfValidate(array $booking)
+	public function checkIfValid(array $booking)
 	{
 		if ($booking['ok'] ?? false)
 		{

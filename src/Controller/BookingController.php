@@ -25,7 +25,7 @@ class BookingController extends AbstractController
 
 		/** @var BookingValidator $validator */
 		$validator     = $this->get(BookingValidator::class);
-		$bookingStatus = $validator->checkIfValidate($booking);
+		$bookingStatus = $validator->checkIfValid($booking);
 
 		if ($bookingStatus)
 		{
