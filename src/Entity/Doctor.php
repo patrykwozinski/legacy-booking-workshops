@@ -8,11 +8,13 @@ class Doctor
 {
 	private $isPremium;
 	private $registeredAt;
+	private $isActive;
 
-	public function __construct(bool $isPremium, \DateTime $registeredAt)
+	public function __construct(bool $isPremium, bool $isActive, \DateTime $registeredAt)
 	{
 		$this->isPremium    = $isPremium;
 		$this->registeredAt = $registeredAt;
+		$this->isActive     = $isActive;
 	}
 
 	public function getIsPremium(): bool
@@ -23,5 +25,10 @@ class Doctor
 	public function getRegisteredAt(): \DateTime
 	{
 		return $this->registeredAt;
+	}
+
+	public function getIsActive(): bool
+	{
+		return $this->isActive;
 	}
 }

@@ -11,26 +11,30 @@ class BookingHelper
 	{
 		$doctor = new Doctor(false);
 
-		$response = [
-			'ok' => false,
-		];
+		$errors = [];
 
 		$monthAgo = (new \DateTime)->modify('-1 month');
 
-		if (true === $doctor->getIsPremium() || $monthAgo <= $doctor->getRegisteredAt())
+		if (false === $doctor->getIsPremium() && $monthAgo > $doctor->getRegisteredAt())
 		{
-			return array_merge($response, [
-				'date'    => new \DateTime($date),
-				'doctor'  => '',
-				'patient' => $patient,
-			]);
+			$errors['notPremium']         = true;
+			$errors['registeredRecently'] = true;
 		}
 
-		$errors = [
-			'notPremium'         => true,
-			'registeredRecently' => true,
-		];
+		if (false === $doctor->getIsActive())
+		{
+			$errors['notActive'] = true;
+		}
 
-		return array_merge($response, $errors);
+		if ([] !== $errors)
+		{
+			return array_merge(['ok' => false], $errors);
+		}
+
+		return array_merge(['ok' => true], [
+			'date'    => new \DateTime($date),
+			'doctor'  => '',
+			'patient' => $patient,
+		]);
 	}
 }
