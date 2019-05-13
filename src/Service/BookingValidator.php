@@ -31,6 +31,16 @@ class BookingValidator
 			$failedBy[] = 'given date is from the past';
 		}
 
+		if (isset($errors['notPremium']))
+		{
+			$failedBy[] = 'doctor must be premium';
+		}
+
+		if (isset($errors['notActive']))
+		{
+			$failedBy[] = 'doctor must be active';
+		}
+
 		return implode(', ', $failedBy);
 	}
 }
