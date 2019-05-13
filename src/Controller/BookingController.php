@@ -16,13 +16,12 @@ class BookingController extends AbstractController
 {
 	public function bookVisit(Request $request): Response
 	{
-		/** @var BookingHelper $bookingHelper */
-		$bookingHelper = $this->get(BookingHelper::class);
-
 		$date     = $request->get('date');
 		$doctorId = $request->get('doctorId');
 
-		$booking = $bookingHelper->create($date, $doctorId, $request->get('patient'));
+		/** @var BookingHelper $bookingHelper */
+		$bookingHelper = $this->get(BookingHelper::class);
+		$booking       = $bookingHelper->create($date, $doctorId, $request->get('patient'));
 
 		/** @var AvailabilityApiClient $availabilityApi */
 		$availabilityApi = $this->get(AvailabilityApiClient::class);
