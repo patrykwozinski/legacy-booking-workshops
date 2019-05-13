@@ -9,6 +9,7 @@ use App\SDK\AvailabilityApiClient\IO\Doctor;
 use App\Service\BookingHelper;
 use App\Service\BookingValidator;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -33,16 +34,16 @@ class BookCommand extends Command
 	public function configure()
 	{
 		$this->setName('booking:book')
-			->addOption('doctorId')
-			->addOption('date')
-			->addOption('patient');
+			->addArgument('doctorId', InputArgument::REQUIRED)
+			->addArgument('date', InputArgument::REQUIRED)
+			->addArgument('patient', InputArgument::OPTIONAL);
 	}
 
 	public function execute(InputInterface $input, OutputInterface $output)
 	{
-		$doctorId = (int)$input->getOption('doctorId');
-		$date     = $input->getOption('date');
-		$patient  = $input->getOption('patient');
+		$doctorId = (int)$input->getArgument('doctorId');
+		$date     = $input->getArgument('date');
+		$patient  = $input->getArgument('patient');
 
 		$booking      = $this->bookingHelper->create($date, $doctorId, $patient);
 		$availability = $this->availabilityApiClient->getAvailabilityInformation(

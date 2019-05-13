@@ -12,6 +12,6 @@ final class AvailabilityApiClient
 {
 	public function getAvailabilityInformation(Doctor $doctor, \DateTimeImmutable $when): Availability
 	{
-		return new Availability(Duration::inMinutes(30), true, $when);
+		return new Availability(Duration::inMinutes(30), true, $when, false);
 	}
 }
