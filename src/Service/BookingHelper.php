@@ -9,7 +9,7 @@ class BookingHelper
 {
 	public function create(string $date, int $doctorId, ?string $patient): array
 	{
-		$doctor = new Doctor(true, false, new \DateTime('tomorrow 6AM'));
+		$doctor = new Doctor(true, true, new \DateTime('tomorrow 6AM'));
 
 		$errors = [];
 
