@@ -8,6 +8,7 @@ use App\SDK\AvailabilityApiClient\AvailabilityApiClient;
 use App\SDK\AvailabilityApiClient\IO\Doctor;
 use App\Service\BookingHelper;
 use App\Service\BookingValidator;
+use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,7 +20,7 @@ class BookingController extends AbstractController
 		$date     = $request->get('date');
 		$doctorId = $request->get('doctorId');
 
-//		$this->get();
+        $this->get(EntityManager::class);
 
 		/** @var BookingHelper $bookingHelper */
 		$bookingHelper = $this->get(BookingHelper::class);
