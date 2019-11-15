@@ -13,20 +13,16 @@ use App\Service\BookingValidator;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\ORM\EntityManager;
 use Ramsey\Uuid\Uuid;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class BookingController extends Controller
 {
 	public function bookVisit(Request $request): JsonResponse
 	{
 		$date = $request->get('date') ?? '';
-		$doctorId = $request->get('doctorId') ?? '';
+		$doctorId = $request->get('doctor_id') ?? '';
 		$patient = $request->get('patient') ?? '';
 
 		/** @var Registry $em */
@@ -53,7 +49,7 @@ class BookingController extends Controller
         );
 
         if (false === $availability->exists() || $availability->reserved()) {
-            return $this->json('Given date does not exists in calendar or is reserved');
+            return new JsonResponse('Given date does not exists in calendar or is reserved');
         }
 
         /** @var BookingValidator $validator */
@@ -68,10 +64,10 @@ class BookingController extends Controller
 			$em->getManager()->persist($booking);
 			$em->getManager()->flush();
 
-            return $this->json('Booked!');
+            return new JsonResponse('Booked!');
         }
 
-        return $this->json('Cannot book visit with errors: ' . $bookingStatus);
+        return new JsonResponse('Cannot book visit with errors: ' . $bookingStatus);
     }
 
     public function getBookings(Request $request): JsonResponse
@@ -90,7 +86,7 @@ class BookingController extends Controller
             ];
         }, $bookings);
 
-        return $this->json([
+        return new JsonResponse([
             'doctor' => $request->get('doctor_id'),
             'bookings' => $bookings,
         ]);
