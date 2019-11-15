@@ -27,10 +27,11 @@ RUN    addgroup -g ${gid} -S app \
         libzip \
         libzip-dev \
         zlib-dev \
+# Intl
+        icu-libs \
+        icu-dev \
 # PHP extensions
-    && docker-php-ext-install zip \
-    && docker-php-ext-install pdo \
-    && docker-php-ext-install pdo_mysql \
+    && docker-php-ext-install zip pdo pdo_mysql intl \
 # Composer permissions
     && chmod 755 /usr/local/bin/composer \
     && chown app:app $COMPOSER_HOME \

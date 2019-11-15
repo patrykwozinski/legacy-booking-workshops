@@ -199,7 +199,7 @@ function cmd_shell()
         SHELL=$(cmd_compose exec "$SERVICE" sh -c "which zsh bash dash ash sh | head -1 | tr '\n' ' '")
     fi
 
-    cmd_compose exec -u $USER -e COLUMNS="$(tput cols)" -e LINES="$(tput lines)" -e TERM="$TERM" "$SERVICE" "$SHELL"
+    cmd_compose exec -u $USER -e COLUMNS="$(tput cols)" -e LINES="$(tput lines)" -e TERM="$TERM" "$SERVICE" $SHELL
 }
 
 # -----------------------------------------------------------------------------
