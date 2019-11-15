@@ -143,6 +143,7 @@ function cmd_install()
 {
     cmd_start
     cmd_compose exec -u app php composer install
+    cmd_compose exec -u app php ./bin/console doctrine:schema:update --force
 }
 
 function cmd_test()
