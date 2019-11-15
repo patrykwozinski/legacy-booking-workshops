@@ -145,6 +145,11 @@ function cmd_install()
     cmd_compose exec -u app php composer install
 }
 
+function cmd_test()
+{
+    cmd_compose exec -u app php ./vendor/phpunit/phpunit/phpunit -c phpunit.xml.dist
+}
+
 function cmd_clean()
 {
     cmd_compose down
@@ -208,34 +213,21 @@ elif [[ ${MODE} == "stop" ]]; then
     cmd_stop "$@"
 elif [[ ${MODE} == "install" ]]; then
     cmd_install
+elif [[ ${MODE} == "test" ]]; then
+    cmd_test
 elif [[ ${MODE} == "clean" ]]; then
     cmd_clean
 elif [[ ${MODE} == "shell" ]]; then
     cmd_shell "$@"
 else
-    if [[ ${MODE} == "help" ]] && [[ $1 == "compose" ]]; then
-        echo "Usage: $0 compose [ARGS...]"
-    elif [[ ${MODE} == "help" ]] && [[ $1 == "start" ]]; then
-        echo "Usage: $0 start [SERVICES...]"
-    elif [[ ${MODE} == "help" ]] && [[ $1 == "stop" ]]; then
-        echo "Usage: $0 create-project PACKAGE_NAME [VERSION]"
-    elif [[ ${MODE} == "help" ]] && [[ $1 == "shell" ]]; then
-        echo "Usage: $0 shell [options] SERVICE"
-        echo ""
-        echo "Options:"
-        echo "  -u, --user    User to log in (default: app)"
-        echo "  -s, --shell   Shell to use"
-    elif [[ ${MODE} == "help" ]] && [[ $1 == "clean" ]]; then
-        echo "Usage: $0 clean"
-    else
-        echo "Usage: $0 compose|start|stop|clean|shell"
-        echo ""
-        echo "Commands:"
-        echo "  compose        Wrapper for docker-compose commands"
-        echo "  start          Starts all or selected Docker containers"
-        echo "  stop           Stops all or selected Docker containers"
-        echo "  install        Installs application"
-        echo "  shell          Opens container's shell"
-        echo "  clean          Removes all images, containers and volumes associated with your project"
-    fi
+    echo "Usage: $0 compose|start|stop|install|test|shell|clean"
+    echo ""
+    echo "Commands:"
+    echo "  compose        Wrapper for docker-compose commands"
+    echo "  start          Starts all or selected Docker containers"
+    echo "  stop           Stops all or selected Docker containers"
+    echo "  install        Installs application"
+    echo "  test           Runs tests"
+    echo "  shell          Opens container's shell"
+    echo "  clean          Removes all images, containers and volumes associated with your project"
 fi
