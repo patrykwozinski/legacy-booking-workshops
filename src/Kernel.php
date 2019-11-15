@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App;
 
-use App\Shared\Infrastructure\DependencyInjection\MessageBusCompilerPass;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Config\Resource\FileResource;
@@ -17,20 +16,6 @@ class Kernel extends BaseKernel
 
 	private const CONFIG_EXTS = '.{php,xml,yaml,yml}';
 
-	private $appId;
-
-	public function __construct(string $environment, bool $debug, string $appId = null)
-	{
-		$this->appId = $appId ?? \getenv('APP');
-
-		if (empty($this->appId))
-		{
-			throw new \InvalidArgumentException('APP_ID is empty!');
-		}
-
-		parent::__construct($environment, $debug);
-	}
-
 	public function registerBundles(): iterable
 	{
 		$contents = require $this->getProjectDir() . '/config/bundles.php';
@@ -43,26 +28,6 @@ class Kernel extends BaseKernel
 		}
 	}
 
-	public function getLogDir(): string
-	{
-		return \sprintf(
-			'%s/var/logs/%s/%s',
-			$this->getProjectDir(),
-			$this->environment,
-			$this->appId
-		);
-	}
-
-	public function getCacheDir(): string
-	{
-		return \sprintf(
-			'%s/var/cache/%s/%s',
-			$this->getProjectDir(),
-			$this->environment,
-			$this->appId
-		);
-	}
-
 	protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader): void
 	{
 		$container->addResource(new FileResource($this->getProjectDir() . '/config/bundles.php'));
@@ -73,7 +38,6 @@ class Kernel extends BaseKernel
 		$loader->load($confDir . '/{packages}/' . $this->environment . '/**/*' . self::CONFIG_EXTS, 'glob');
 		$loader->load($confDir . '/{services}' . self::CONFIG_EXTS, 'glob');
 		$loader->load($confDir . '/{services}_' . $this->environment . self::CONFIG_EXTS, 'glob');
-		$loader->load(\sprintf($confDir . '/app/%s.yml', $this->appId));
 	}
 
 	protected function configureRoutes(RouteCollectionBuilder $routes): void

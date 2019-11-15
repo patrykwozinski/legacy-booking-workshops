@@ -19,6 +19,8 @@ class BookingController extends AbstractController
 		$date     = $request->get('date');
 		$doctorId = $request->get('doctorId');
 
+//		$this->get();
+
 		/** @var BookingHelper $bookingHelper */
 		$bookingHelper = $this->get(BookingHelper::class);
 		$booking       = $bookingHelper->create($date, $doctorId, $request->get('patient'));
