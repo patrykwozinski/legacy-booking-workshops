@@ -53,8 +53,18 @@ class Booking
         $this->patient = $patient;
     }
 
+    public function getPatient(): string
+    {
+        return $this->patient;
+    }
+
     public function setDate(DateTime $date): void
     {
         $this->date = $date;
+    }
+
+    public function getDate(): DateTime
+    {
+        return $this->date;
     }
 }
