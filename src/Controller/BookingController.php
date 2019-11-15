@@ -12,59 +12,81 @@ use App\Service\BookingHelper;
 use App\Service\BookingValidator;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
-class BookingController extends AbstractController
+class BookingController extends Controller
 {
-    public function bookVisit(Request $request): Response
-    {
-        $date = $request->get('date');
-        $doctorId = $request->get('doctorId');
+	public function bookVisit(Request $request): JsonResponse
+	{
+		$date = $request->get('date') ?? '';
+		$doctorId = $request->get('doctorId') ?? '';
 
-        /** @var EntityManager $em */
-        $em = $this->get('doctrine');
-        /** @var DoctorEntity $doctor */
-        $doctor = $em->getRepository(DoctorEntity::class)->find($doctorId ?? '');
+		/** @var EntityManager $em */
+		$em = $this->get('doctrine');
+		/** @var DoctorEntity $doctor */
+		$doctor = $em->getRepository(DoctorEntity::class)->find($doctorId);
 
-        /** @var BookingHelper $bookingHelper */
-        $bookingHelper = $this->get(BookingHelper::class);
-        $booking = $bookingHelper->create($date, $doctor, $request->get('patient'));
+		if (!$doctor) {
+			throw new HttpException(418);
+		}
 
-        /** @var AvailabilityApiClient $availabilityApi */
-        $availabilityApi = $this->get(AvailabilityApiClient::class);
-        $availability = $availabilityApi->getAvailabilityInformation(
-            new SdkDoctor($doctorId),
-            new \DateTimeImmutable($date)
-        );
+		/** @var BookingHelper $bookingHelper */
+		$bookingHelper = $this->get(BookingHelper::class);
+		$booking = $bookingHelper->create($date, $doctor, $request->get('patient'));
 
-        if (false === $availability->exists() || $availability->reserved()) {
-            return new Response('Given date does not exists in calendar or is reserved');
-        }
+		/** @var AvailabilityApiClient $availabilityApi */
+		$availabilityApi = $this->get(AvailabilityApiClient::class);
+		$availability = $availabilityApi->getAvailabilityInformation(
+			new SdkDoctor($doctorId),
+			new \DateTimeImmutable($date)
+		);
 
-        /** @var BookingValidator $validator */
-        $validator = $this->get(BookingValidator::class);
-        $bookingStatus = $validator->checkIfValid($booking);
+		if (false === $availability->exists() || $availability->reserved()) {
+			return new JsonResponse('Given date does not exists in calendar or is reserved');
+		}
 
-        if ($bookingStatus) {
-            $booking = new Booking;
-            $booking->setDoctor($doctor);
-            $booking->setPatient($booking['patient']);
-            $booking->setDate($booking['date']);
-            $em->persist($booking);
-            $em->flush();
+		/** @var BookingValidator $validator */
+		$validator = $this->get(BookingValidator::class);
+		$bookingStatus = $validator->checkIfValid($booking);
 
-			$event = new BookedEvent();
-			$event->date = $date;
-			$event->doctorId = $doctorId;
+		if ($bookingStatus) {
+			$booking = new Booking;
+			$booking->setDoctor($doctor);
+			$booking->setPatient($booking['patient']);
+			$booking->setDate($booking['date']);
+			$em->persist($booking);
+			$em->flush();
 
-			/** @var EventDispatcherInterface $dispatcher */
-			$dispatcher = $this->get(EventDispatcherInterface::class);
-			$dispatcher->dispatch($event);
+			return new JsonResponse('Booked!');
+		}
 
-            return new Response('Booked!');
-        }
+		return new JsonResponse('Cannot book visit with errors: ' . $bookingStatus);
+	}
 
-        return new Response('Cannot book visit with errors: ' . $bookingStatus);
-    }
+	public function getBookings(Request $request): JsonResponse
+	{
+		/** @var EntityManager $em */
+		$em = $this->get('doctrine');
+
+		$bookings = $em->getRepository(Booking::class)->findBy([
+			'doctor_id' => $request->get('doctor_id'),
+		]);
+
+		$bookings = array_map(function (Booking $booking) {
+			return [
+				'date' => $booking->getDate()->format('Y-m-d H:i:s'),
+				'patient' => $booking->getPatient(),
+			];
+		}, $bookings);
+
+		return new JsonResponse([
+			'doctor' => $request->get('doctor_id'),
+			'bookings' => $bookings,
+		]);
+	}
 }
