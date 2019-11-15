@@ -29,7 +29,7 @@ class Booking
      * @var Doctor
      *
      * @ManyToOne(targetEntity="Doctor", inversedBy="bookings")
-     * @JoinColumn(name="doctor_id", referencedColumnName="id")
+     * @JoinColumn(name="doctor_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $doctor;
 
