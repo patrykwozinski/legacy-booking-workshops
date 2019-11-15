@@ -29,6 +29,8 @@ RUN    addgroup -g ${gid} -S app \
         zlib-dev \
 # PHP extensions
     && docker-php-ext-install zip \
+    && docker-php-ext-install pdo \
+    && docker-php-ext-install pdo_mysql \
 # Composer permissions
     && chmod 755 /usr/local/bin/composer \
     && chown app:app $COMPOSER_HOME \

@@ -20,6 +20,9 @@ services:
     php:
         container_name: ${PROJECT_NAME}_php
         image: ${PROJECT_NAME}_php
+        env_file:
+            - .env
+            - .db.env
         build:
             context: php
             args:
