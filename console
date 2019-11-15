@@ -1,0 +1,241 @@
+#!/usr/bin/env bash
+set -e
+
+# -----------------------------------------------------------------------------
+# Load environment variables
+# -----------------------------------------------------------------------------
+
+# Set current directory to directory of this script
+cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)/docker"
+
+if [ "$(uname)" == "Darwin" ]; then
+    OS_TYPE="mac"
+    DEFAULT_ENV=".env-macos.dev"
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    OS_TYPE="linux"
+    DEFAULT_ENV=".env-linux.dev"
+else
+    echo "Unsupported OS!"
+    exit 1
+fi
+
+# Copy template file
+if ! [[ -f .env ]]; then
+    cat $DEFAULT_ENV \
+        | grep -v "#" \
+        | xargs -n1 -L 1 -I{} sh -c 'echo {}' \
+        > .env
+fi
+
+# Import environment variables from dotenv
+eval "$(cat .env \
+    | grep -v "#" \
+    | sed -E 's/^([^=]*)=(.*)$/export \1="\2"/p')"
+
+MODE=$1
+[[ -z $MODE ]] || shift
+
+# -----------------------------------------------------------------------------
+# Check dependencies
+# -----------------------------------------------------------------------------
+
+if ! type docker &> /dev/null; then
+    echo "docker is required to run this script!"
+    exit 1
+fi
+
+if ! type docker-compose &> /dev/null; then
+    echo "docker-compose is required to run this script!"
+    exit 1
+fi
+
+# -----------------------------------------------------------------------------
+# Utils
+# -----------------------------------------------------------------------------
+
+function ask()
+{
+    printf "$@"
+    read -p " (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+function setup_macos_nfs()
+{
+    if [[ $OS_TYPE != "mac" ]]; then
+        return 0
+    fi
+
+    if [[ -f .nfs-configured ]]; then
+        return 0
+    fi
+
+    ask "Do you want setup NFS exports on your machine? Answer 'no' if you have NFS already configured on your machine." || ret=$?
+
+    if [[ $ret == "1" ]]; then
+        touch .nfs-configured
+        return 0
+    fi
+
+    USER_ID=`id -u`
+    GROUP_ID=`id -g`
+
+    NFS_EXPORT_LINE="/Users -alldirs -mapall=${USER_ID}:${GROUP_ID} localhost"
+    NFS_EXPORT_FILE=/etc/exports
+    NFS_CONF_LINE="nfs.server.mount.require_resv_port = 0"
+    NFS_CONF_FILE=/etc/nfs.conf
+
+    [[ -f $NFS_EXPORT_FILE ]] || sudo touch $NFS_EXPORT_FILE
+    [[ -f $NFS_CONF_FILE ]]   || sudo touch $NFS_CONF_FILE
+
+    RESTART=0
+    if ! grep -qF -- "$NFS_EXPORT_LINE" "$NFS_EXPORT_FILE" || ! grep -qF -- "$NFS_CONF_LINE" "$NFS_CONF_FILE"; then
+        RESTART=1
+    fi
+
+    if [[ $RESTART == "1" ]]; then
+        osascript -e 'quit app "Docker"'
+
+        grep -qF -- "$NFS_EXPORT_LINE" "$NFS_EXPORT_FILE" || sudo echo "$NFS_EXPORT_LINE" | sudo tee -a $NFS_EXPORT_FILE > /dev/null
+        grep -qF -- "$NFS_CONF_LINE" "$NFS_CONF_FILE"     || sudo echo "$NFS_CONF_LINE"   | sudo tee -a $NFS_CONF_FILE > /dev/null
+
+        sudo nfsd restart
+        open -a Docker
+
+        while ! docker ps > /dev/null 2>&1 ; do
+            sleep 1;
+        done
+    fi
+
+    touch .nfs-configured
+}
+
+# -----------------------------------------------------------------------------
+# Commands
+# -----------------------------------------------------------------------------
+
+function cmd_compose()
+{
+    docker-compose ${DOCKER_COMPOSE_ARGS} --project-name ${PROJECT_NAME} "$@"
+}
+
+function cmd_start()
+{
+    mkdir -p $APP_PATH
+    mkdir -p $APP_PATH/$WEB_PATH
+    mkdir -p $DATA_PATH
+
+    setup_macos_nfs
+    cmd_compose up -d "$@"
+}
+
+function cmd_stop()
+{
+    cmd_compose stop "$@"
+}
+
+function cmd_install()
+{
+    cmd_start
+    cmd_compose exec -u app php composer install
+}
+
+function cmd_clean()
+{
+    cmd_compose down
+
+    for ID in $(docker ps -a -q --filter "name=${PROJECT_NAME}_"); do docker rm -f "${ID}"; done
+    for ID in $(docker images "${PROJECT_NAME}_*" --format "{{.Repository}}"); do docker rmi -f "${ID}"; done
+    for ID in $(docker images "*/${PROJECT_NAME}_*" --format "{{.Repository}}"); do docker rmi -f "${ID}"; done
+    for ID in $(docker volume ls -q --filter "name=${PROJECT_NAME}_"); do docker volume rm -f "${ID}"; done
+}
+
+function cmd_shell()
+{
+    USER=app
+    SHELL=
+    while [[ $# -gt 0 ]]; do
+        ARG="$1"
+
+        if [[ $ARG == "-u" ]] || [[ $ARG == "--user" ]]; then
+            shift
+            USER=$1
+        elif [[ $ARG == "-s" ]] || [[ $ARG == "--shell" ]]; then
+            shift
+            SHELL=$1
+        else
+            break
+        fi
+
+        shift
+    done
+
+    SERVICE=$1
+    shift
+
+    if [[ -z $SERVICE ]]; then
+        echo "Missing SERVICE argument."
+
+        return 1
+    fi
+
+    if ! cmd_compose exec "$SERVICE" id "$USER" &> /dev/null; then
+        echo "User $USER do not exists. You will be logged as root."
+        USER=root
+    fi
+
+    if [[ -z $SHELL ]]; then
+        SHELL=$(cmd_compose exec "$SERVICE" sh -c "which zsh bash dash ash sh | head -1 | tr '\n' ' '")
+    fi
+
+    cmd_compose exec -u $USER -e COLUMNS="$(tput cols)" -e LINES="$(tput lines)" -e TERM="$TERM" "$SERVICE" "$SHELL"
+}
+
+# -----------------------------------------------------------------------------
+# Run commands
+# -----------------------------------------------------------------------------
+
+if [[ ${MODE} == "compose" ]]; then
+    cmd_compose "$@"
+elif [[ ${MODE} == "start" ]]; then
+    cmd_start "$@"
+elif [[ ${MODE} == "stop" ]]; then
+    cmd_stop "$@"
+elif [[ ${MODE} == "install" ]]; then
+    cmd_install
+elif [[ ${MODE} == "clean" ]]; then
+    cmd_clean
+elif [[ ${MODE} == "shell" ]]; then
+    cmd_shell "$@"
+else
+    if [[ ${MODE} == "help" ]] && [[ $1 == "compose" ]]; then
+        echo "Usage: $0 compose [ARGS...]"
+    elif [[ ${MODE} == "help" ]] && [[ $1 == "start" ]]; then
+        echo "Usage: $0 start [SERVICES...]"
+    elif [[ ${MODE} == "help" ]] && [[ $1 == "stop" ]]; then
+        echo "Usage: $0 create-project PACKAGE_NAME [VERSION]"
+    elif [[ ${MODE} == "help" ]] && [[ $1 == "shell" ]]; then
+        echo "Usage: $0 shell [options] SERVICE"
+        echo ""
+        echo "Options:"
+        echo "  -u, --user    User to log in (default: app)"
+        echo "  -s, --shell   Shell to use"
+    elif [[ ${MODE} == "help" ]] && [[ $1 == "clean" ]]; then
+        echo "Usage: $0 clean"
+    else
+        echo "Usage: $0 compose|start|stop|clean|shell"
+        echo ""
+        echo "Commands:"
+        echo "  compose        Wrapper for docker-compose commands"
+        echo "  start          Starts all or selected Docker containers"
+        echo "  stop           Stops all or selected Docker containers"
+        echo "  install        Installs application"
+        echo "  shell          Opens container's shell"
+        echo "  clean          Removes all images, containers and volumes associated with your project"
+    fi
+fi

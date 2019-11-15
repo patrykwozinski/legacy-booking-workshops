@@ -28,3 +28,8 @@
 ###> phpunit/phpunit ###
 .phpunit.result.cache
 ###< phpunit/phpunit ###
+
+### App
+/data
+/docker/.env
+/docker/.nfs-configured
