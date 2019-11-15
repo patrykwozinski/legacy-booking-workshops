@@ -7,32 +7,28 @@ use App\Entity\Doctor;
 
 class BookingHelper
 {
-	public function create(string $date, Doctor $doctor, ?string $patient): array
-	{
-		$errors = [];
+    public function create(string $date, Doctor $doctor, ?string $patient): array
+    {
+        $errors = [];
+        $monthAgo = (new \DateTime)->modify('-1 month');
 
-		$monthAgo = (new \DateTime)->modify('-1 month');
+        if (false === $doctor->getIsPremium() && $monthAgo > $doctor->getRegisteredAt()) {
+            $errors['notPremium'] = true;
+            $errors['registeredRecently'] = true;
+        }
 
-		if (false === $doctor->getIsPremium() && $monthAgo > $doctor->getRegisteredAt())
-		{
-			$errors['notPremium']         = true;
-			$errors['registeredRecently'] = true;
-		}
+        if (false === $doctor->getIsActive()) {
+            $errors['notActive'] = true;
+        }
 
-		if (false === $doctor->getIsActive())
-		{
-			$errors['notActive'] = true;
-		}
+        if ([] !== $errors) {
+            return array_merge(['ok' => false], $errors);
+        }
 
-		if ([] !== $errors)
-		{
-			return array_merge(['ok' => false], $errors);
-		}
-
-		return array_merge(['ok' => true], [
-			'date'    => new \DateTime($date),
-			'doctor'  => '',
-			'patient' => $patient,
-		]);
-	}
+        return array_merge(['ok' => true], [
+            'date' => new \DateTime($date),
+            'doctor' => $doctor,
+            'patient' => $patient,
+        ]);
+    }
 }

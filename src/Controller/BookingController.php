@@ -49,6 +49,8 @@ class BookingController extends AbstractController
         if ($bookingStatus) {
             $booking = new Booking;
             $booking->setDoctor($doctor);
+            $booking->setPatient($booking['patient']);
+            $booking->setDate($booking['date']);
             $em->persist($booking);
             $em->flush();
 

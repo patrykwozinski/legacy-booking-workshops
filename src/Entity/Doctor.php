@@ -5,17 +5,49 @@ namespace App\Entity;
 
 
 use DateTime;
+use Doctrine\ORM\Mapping as ORM;
+use Ramsey\Uuid\UuidInterface;
 
+/**
+ * @ORM\Entity()
+ */
 class Doctor
 {
-    /** @var bool */
+    /**
+     * @var UuidInterface
+     *
+     * @ORM\Id
+     * @ORM\Column(type="uuid", unique=true)
+     * @ORM\GeneratedValue(strategy="CUSTOM")
+     * @ORM\CustomIdGenerator(class="Ramsey\Uuid\Doctrine\UuidGenerator")
+     */
+    private $id;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(type="boolean", nullable=false)
+     */
     private $isPremium;
 
-    /** @var DateTime */
+    /**
+     * @var bool
+     *
+     * @ORM\Column(type="boolean", nullable=false)
+     */
+    private $isActive;
+
+    /**
+     * @var DateTime
+     *
+     * @ORM\Column(type="datetime")
+     */
     private $registeredAt;
 
-    /** @var bool */
-    private $isActive;
+    public function getId(): UuidInterface
+    {
+        return $this->id;
+    }
 
     public function getIsPremium(): bool
     {
@@ -27,16 +59,6 @@ class Doctor
         $this->isPremium = $isPremium;
     }
 
-    public function getRegisteredAt(): DateTime
-    {
-        return $this->registeredAt;
-    }
-
-    public function setRegisteredAt(DateTime $dateTime): void
-    {
-        $this->registeredAt = $dateTime;
-    }
-
     public function getIsActive(): bool
     {
         return $this->isActive;
@@ -45,5 +67,15 @@ class Doctor
     public function setIsActive(bool $isActive): void
     {
         $this->isActive = $isActive;
+    }
+
+    public function getRegisteredAt(): DateTime
+    {
+        return $this->registeredAt;
+    }
+
+    public function setRegisteredAt(DateTime $registeredAt): void
+    {
+        $this->registeredAt = $registeredAt;
     }
 }
