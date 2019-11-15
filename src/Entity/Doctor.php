@@ -18,8 +18,6 @@ class Doctor
      *
      * @ORM\Id
      * @ORM\Column(type="uuid", unique=true)
-     * @ORM\GeneratedValue(strategy="CUSTOM")
-     * @ORM\CustomIdGenerator(class="Ramsey\Uuid\Doctrine\UuidGenerator")
      */
     private $id;
 
@@ -48,6 +46,11 @@ class Doctor
     {
         return $this->id;
     }
+
+	public function setId(UuidInterface $id): void
+	{
+		$this->id = $id;
+	}
 
     public function getIsPremium(): bool
     {

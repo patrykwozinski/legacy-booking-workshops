@@ -5,15 +5,15 @@ namespace App\SDK\AvailabilityApiClient\IO;
 
 final class Doctor
 {
-    /** @var int */
+    /** @var string */
 	private $id;
 
-	public function __construct(int $id)
+	public function __construct(string $id)
 	{
 		$this->id = $id;
 	}
 
-	public function id(): int
+	public function id(): string
 	{
 		return $this->id;
 	}

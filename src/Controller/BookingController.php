@@ -10,7 +10,9 @@ use App\SDK\AvailabilityApiClient\AvailabilityApiClient;
 use App\SDK\AvailabilityApiClient\IO\Doctor as SdkDoctor;
 use App\Service\BookingHelper;
 use App\Service\BookingValidator;
+use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\ORM\EntityManager;
+use Ramsey\Uuid\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -25,11 +27,12 @@ class BookingController extends Controller
 	{
 		$date = $request->get('date') ?? '';
 		$doctorId = $request->get('doctorId') ?? '';
+		$patient = $request->get('patient') ?? '';
 
-		/** @var EntityManager $em */
+		/** @var Registry $em */
 		$em = $this->get('doctrine');
 		/** @var DoctorEntity $doctor */
-		$doctor = $em->getRepository(DoctorEntity::class)->find($doctorId);
+		$doctor = $em->getRepository(DoctorEntity::class)->find(Uuid::fromString($doctorId));
 
 		if (!$doctor) {
 			throw new HttpException(418);
@@ -57,10 +60,10 @@ class BookingController extends Controller
 		if ($bookingStatus) {
 			$booking = new Booking;
 			$booking->setDoctor($doctor);
-			$booking->setPatient($booking['patient']);
-			$booking->setDate($booking['date']);
-			$em->persist($booking);
-			$em->flush();
+			$booking->setPatient($patient);
+			$booking->setDate(new \DateTime($date));
+			$em->getManager()->persist($booking);
+			$em->getManager()->flush();
 
 			return new JsonResponse('Booked!');
 		}
