@@ -5,6 +5,7 @@ namespace App\SDK\AvailabilityApiClient\IO;
 
 final class Doctor
 {
+    /** @var int */
 	private $id;
 
 	public function __construct(int $id)

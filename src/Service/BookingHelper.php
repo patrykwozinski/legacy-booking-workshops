@@ -7,10 +7,8 @@ use App\Entity\Doctor;
 
 class BookingHelper
 {
-	public function create(string $date, int $doctorId, ?string $patient): array
+	public function create(string $date, Doctor $doctor, ?string $patient): array
 	{
-		$doctor = new Doctor(true, true, new \DateTime('tomorrow 6AM'));
-
 		$errors = [];
 
 		$monthAgo = (new \DateTime)->modify('-1 month');
