@@ -77,7 +77,7 @@ class BookingController extends Controller
 		$em = $this->get('doctrine');
 
 		$bookings = $em->getRepository(Booking::class)->findBy([
-			'doctor_id' => $request->get('doctor_id'),
+			'doctor' => $request->get('doctor_id'),
 		]);
 
 		$bookings = array_map(function (Booking $booking) {
