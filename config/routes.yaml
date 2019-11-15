@@ -1,7 +1,11 @@
-index:
+book:
     path: /book
     controller: App\Controller\BookingController::bookVisit
+    defaults:
+        _format: json
+    methods: ['POST']
 
-booked:
-    path: /booked
+get_bookings:
+    path: /bookings
     controller: App\Controller\BookingController::getBookings
+    methods: ['GET']
