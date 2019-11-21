@@ -47,6 +47,11 @@ class Booking
      */
     private $date;
 
+    public function getId(): UuidInterface
+    {
+        return $this->id;
+    }
+
     public function setDoctor(Doctor $doctor): void
     {
         $this->doctor = $doctor;

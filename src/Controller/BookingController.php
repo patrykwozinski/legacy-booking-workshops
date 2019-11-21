@@ -66,10 +66,16 @@ class BookingController extends Controller
             $em->getManager()->persist($booking);
             $em->getManager()->flush();
 
-            return new JsonResponse('Booked!');
+            return new JsonResponse([
+                'message' => 'Booked!',
+                'booking_id' => $booking->getId()->toString(),
+            ]);
         }
 
-        return new JsonResponse('Cannot book visit with errors: ' . $bookingStatus);
+        return new JsonResponse([
+            'message' => 'Cannot book visit with errors: ' . $bookingStatus,
+            'doctor_id' => $doctorId,
+        ]);
     }
 
     public function getBookings(Request $request): JsonResponse
