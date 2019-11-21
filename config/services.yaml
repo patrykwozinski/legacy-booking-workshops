@@ -34,5 +34,9 @@ services:
     App\Service\BookingValidator:
         public: true
 
+    App\Subscriber\EventSubscriber:
+        tags:
+            - { name: kernel.event_listener, event: "App\\Event\\BookedEvent", method: "onBookedEvent" }
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

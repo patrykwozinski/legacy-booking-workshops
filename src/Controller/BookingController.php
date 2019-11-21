@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Entity\Booking;
 use App\Entity\Doctor as DoctorEntity;
+use App\Event\BookedEvent;
 use App\SDK\AvailabilityApiClient\AvailabilityApiClientInterface;
 use App\SDK\AvailabilityApiClient\IO\Doctor as SdkDoctor;
 use App\Service\BookingHelper;
@@ -14,11 +15,16 @@ use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\ORM\EntityManager;
 use Ramsey\Uuid\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
 
 class BookingController extends Controller
 {
+	/**
+	 * @Route( "/book")
+	 */
     public function bookVisit(Request $request): JsonResponse
     {
         $date = $request->get('date') ?? '';
@@ -29,6 +35,8 @@ class BookingController extends Controller
         $em = $this->get('doctrine');
         /** @var DoctorEntity $doctor */
         $doctor = $em->getRepository(DoctorEntity::class)->find(Uuid::fromString($doctorId));
+        /** @var EventDispatcherInterface $ed */
+        $ed = $this->get('event_dispatcher');
 
         if (!$doctor) {
             return new JsonResponse([
@@ -66,6 +74,12 @@ class BookingController extends Controller
             $em->getManager()->persist($booking);
             $em->getManager()->flush();
 
+            $event = new BookedEvent;
+            $event->date = new \DateTime($date);
+            $event->doctorId = $doctorId;
+
+			$ed->dispatch($event);
+
             return new JsonResponse([
                 'message' => 'Booked!',
                 'booking_id' => $booking->getId()->toString(),
@@ -78,6 +92,9 @@ class BookingController extends Controller
         ]);
     }
 
+	/**
+	 * @Route( "/bookings")
+	 */
     public function getBookings(Request $request): JsonResponse
     {
         /** @var EntityManager $em */
