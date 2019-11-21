@@ -4,7 +4,6 @@ namespace App\Subscriber;
 
 use App\Entity\Doctor as DoctorEntity;
 use App\Event\BookedEvent;
-use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Ramsey\Uuid\Uuid;
 use Twig\Environment;
