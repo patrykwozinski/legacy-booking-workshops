@@ -1,0 +1,4 @@
+{
+  "message": "Cannot book visit with errors: doctor must be active",
+  "doctor_id": @uuid@
+}

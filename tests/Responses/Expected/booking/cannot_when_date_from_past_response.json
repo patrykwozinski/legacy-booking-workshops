@@ -1,0 +1,4 @@
+{
+  "message": "Cannot book visit with errors: given date is from the past",
+  "doctor_id": @uuid@
+}

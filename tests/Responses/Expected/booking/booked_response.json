@@ -1,0 +1,4 @@
+{
+  "message": "Booked!",
+  "booking_id": @uuid@
+}
