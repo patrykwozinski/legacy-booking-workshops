@@ -25,7 +25,7 @@ class EventSubscriber
 	public function onBookedEvent(BookedEvent $event)
 	{
 		/** @var DoctorEntity $doctor */
-		$doctor = $this->em->getRepository(DoctorEntity::class)->find(Uuid::fromString($event->doctorId));
+		$doctor = $this->em->getRepository(DoctorEntity::class)->find(Uuid::fromString($event->doctor->getId()));
 
 		$message = (new \Swift_Message('Booking confirmation'))
 			->setFrom('info@docplanner.com')

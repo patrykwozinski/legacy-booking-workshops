@@ -78,7 +78,9 @@ class BookingController extends Controller
 
             $event = new BookedEvent;
             $event->date = new \DateTime($date);
+            $event->bookingId = $booking->getId();
             $event->doctorId = $doctorId;
+            $event->doctor = $doctor;
 
 			$ed->dispatch($event);
 
