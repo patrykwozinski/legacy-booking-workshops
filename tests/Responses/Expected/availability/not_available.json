@@ -1,0 +1,4 @@
+{
+  "message": "Given date does not exists in calendar or is reserved",
+  "doctor_id": @uuid@
+}

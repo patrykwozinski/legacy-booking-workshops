@@ -24,7 +24,8 @@ services:
         resource: '../src/Controller'
         tags: ['controller.service_arguments']
 
-    App\SDK\AvailabilityApiClient\AvailabilityApiClient:
+    App\SDK\AvailabilityApiClient\AvailabilityApiClientInterface:
+        class: App\SDK\AvailabilityApiClient\AvailabilityApiClient
         public: true
 
     App\Service\BookingHelper:

@@ -6,7 +6,7 @@ namespace App\Controller;
 
 use App\Entity\Booking;
 use App\Entity\Doctor as DoctorEntity;
-use App\SDK\AvailabilityApiClient\AvailabilityApiClient;
+use App\SDK\AvailabilityApiClient\AvailabilityApiClientInterface;
 use App\SDK\AvailabilityApiClient\IO\Doctor as SdkDoctor;
 use App\Service\BookingHelper;
 use App\Service\BookingValidator;
@@ -19,21 +19,20 @@ use Symfony\Component\HttpFoundation\Request;
 
 class BookingController extends Controller
 {
-	public function bookVisit(Request $request): JsonResponse
-	{
-		$date = $request->get('date') ?? '';
-		$doctorId = $request->get('doctor_id') ?? '';
-		$patient = $request->get('patient') ?? '';
+    public function bookVisit(Request $request): JsonResponse
+    {
+        $date = $request->get('date') ?? '';
+        $doctorId = $request->get('doctor_id') ?? '';
+        $patient = $request->get('patient') ?? '';
 
-		/** @var Registry $em */
-		$em = $this->get('doctrine');
-		/** @var DoctorEntity $doctor */
-		$doctor = $em->getRepository(DoctorEntity::class)->find(Uuid::fromString($doctorId));
+        /** @var Registry $em */
+        $em = $this->get('doctrine');
+        /** @var DoctorEntity $doctor */
+        $doctor = $em->getRepository(DoctorEntity::class)->find(Uuid::fromString($doctorId));
 
         if (!$doctor) {
-            return $this->json([
+            return new JsonResponse([
                 'message' => 'doctor not found',
-                'code' => JsonResponse::HTTP_I_AM_A_TEAPOT,
             ], JsonResponse::HTTP_I_AM_A_TEAPOT);
         }
 
@@ -41,28 +40,31 @@ class BookingController extends Controller
         $bookingHelper = $this->get(BookingHelper::class);
         $booking = $bookingHelper->create($date, $doctor, $request->get('patient'));
 
-        /** @var AvailabilityApiClient $availabilityApi */
-        $availabilityApi = $this->get(AvailabilityApiClient::class);
+        /** @var AvailabilityApiClientInterface $availabilityApi */
+        $availabilityApi = $this->get(AvailabilityApiClientInterface::class);
         $availability = $availabilityApi->getAvailabilityInformation(
             new SdkDoctor($doctorId),
             new \DateTimeImmutable($date)
         );
 
         if (false === $availability->exists() || $availability->reserved()) {
-            return new JsonResponse('Given date does not exists in calendar or is reserved');
+            return new JsonResponse([
+                'message' => 'Given date does not exists in calendar or is reserved',
+                'doctor_id' => $doctorId,
+            ]);
         }
 
         /** @var BookingValidator $validator */
         $validator = $this->get(BookingValidator::class);
         $bookingStatus = $validator->checkIfValid($booking);
 
-		if ($bookingStatus) {
-			$booking = new Booking;
-			$booking->setDoctor($doctor);
-			$booking->setPatient($patient);
-			$booking->setDate(new \DateTime($date));
-			$em->getManager()->persist($booking);
-			$em->getManager()->flush();
+        if ($bookingStatus) {
+            $booking = new Booking;
+            $booking->setDoctor($doctor);
+            $booking->setPatient($patient);
+            $booking->setDate(new \DateTime($date));
+            $em->getManager()->persist($booking);
+            $em->getManager()->flush();
 
             return new JsonResponse('Booked!');
         }
@@ -75,9 +77,9 @@ class BookingController extends Controller
         /** @var EntityManager $em */
         $em = $this->get('doctrine');
 
-		$bookings = $em->getRepository(Booking::class)->findBy([
-			'doctor' => $request->get('doctor_id'),
-		]);
+        $bookings = $em->getRepository(Booking::class)->findBy([
+            'doctor' => $request->get('doctor_id'),
+        ]);
 
         $bookings = array_map(function (Booking $booking) {
             return [

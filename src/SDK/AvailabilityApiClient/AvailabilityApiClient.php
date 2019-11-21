@@ -8,7 +8,7 @@ use App\SDK\AvailabilityApiClient\IO\Availability;
 use App\SDK\AvailabilityApiClient\IO\Doctor;
 use App\SDK\AvailabilityApiClient\IO\Duration;
 
-final class AvailabilityApiClient
+final class AvailabilityApiClient implements AvailabilityApiClientInterface
 {
 	public function getAvailabilityInformation(Doctor $doctor, \DateTimeImmutable $when): Availability
 	{

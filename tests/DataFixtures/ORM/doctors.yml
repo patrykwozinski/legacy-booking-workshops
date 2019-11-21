@@ -1,0 +1,6 @@
+App\Entity\Doctor:
+  doctor_001:
+    id: <(\Ramsey\Uuid\Uuid::fromString('1d67f650-76ab-42dc-a18a-d42b5a85a454'))>
+    is_premium: true
+    is_active: true
+    registered_at: <(new \DateTime())>
