@@ -25,21 +25,27 @@
         "symfony/twig-bundle": "4.3.*",
         "symfony/validator": "4.3.*",
         "symfony/web-link": "4.3.*",
-        "symfony/yaml": "4.3.*"
+        "symfony/yaml": "4.3.*",
+        "webmozart/assert": "^1.5"
     },
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^3.3",
         "friendsofphp/php-cs-fixer": "^2.14",
         "lchrusciel/api-test-case": "^4.1",
         "nelmio/alice": "^3.5",
-        "phpstan/phpstan": "^0.11.5",
-        "phpstan/phpstan-symfony": "^0.11.2",
+        "phpstan/extension-installer": "^1.0",
+        "phpstan/phpstan": "^0.11.19",
+        "phpstan/phpstan-doctrine": "^0.11.6",
+        "phpstan/phpstan-phpunit": "^0.11.2",
+        "phpstan/phpstan-symfony": "^0.11.6",
+        "phpstan/phpstan-webmozart-assert": "^0.11.3",
         "phpunit/phpunit": "^7.5",
         "symfony/debug-pack": "*",
         "symfony/maker-bundle": "^1.0",
         "symfony/profiler-pack": "*",
         "symfony/test-pack": "*",
-        "symfony/web-server-bundle": "4.3.*"
+        "symfony/web-server-bundle": "4.3.*",
+        "thecodingmachine/phpstan-strict-rules": "^0.11.2"
     },
     "config": {
         "preferred-install": {

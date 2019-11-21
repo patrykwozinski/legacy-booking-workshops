@@ -152,6 +152,11 @@ function cmd_test()
     cmd_compose exec -u app php ./vendor/phpunit/phpunit/phpunit -c phpunit.xml.dist
 }
 
+function cmd_phpstan()
+{
+    cmd_compose exec -u app php ./vendor/phpstan/phpstan/bin/phpstan analyse src
+}
+
 function cmd_clean()
 {
     cmd_compose down
@@ -217,6 +222,8 @@ elif [[ ${MODE} == "install" ]]; then
     cmd_install
 elif [[ ${MODE} == "test" ]]; then
     cmd_test
+elif [[ ${MODE} == "phpstan" ]]; then
+    cmd_phpstan
 elif [[ ${MODE} == "clean" ]]; then
     cmd_clean
 elif [[ ${MODE} == "shell" ]]; then
@@ -230,6 +237,7 @@ else
     echo "  stop           Stops all or selected Docker containers"
     echo "  install        Installs application"
     echo "  test           Runs tests"
+    echo "  phpstan        Runs PHPStan"
     echo "  shell          Opens container's shell"
     echo "  clean          Removes all images, containers and volumes associated with your project"
 fi

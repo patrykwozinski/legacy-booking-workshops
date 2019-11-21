@@ -1,0 +1,6 @@
+parameters:
+  autoload_directories:
+    - src
+  level: max
+  symfony:
+    container_xml_path: %rootDir%/../../../var/cache/dev/srcApp_KernelDevDebugContainer.xml
