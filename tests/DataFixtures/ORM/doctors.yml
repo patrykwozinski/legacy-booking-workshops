@@ -14,3 +14,4 @@ App\Entity\Doctor:
     is_premium: true
     is_active: false
     registered_at: <(new \DateTime())>
+

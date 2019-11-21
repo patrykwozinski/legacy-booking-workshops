@@ -1,0 +1,17 @@
+{
+  "doctor_id": @uuid@,
+  "bookings": [
+    {
+      "date": @string@,
+      "patient": @string@
+    },
+    {
+      "date": @string@,
+      "patient": @string@
+    },
+    {
+      "date": @string@,
+      "patient": @string@
+    }
+  ]
+}

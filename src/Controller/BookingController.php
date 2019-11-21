@@ -110,13 +110,13 @@ class BookingController extends Controller
 
         $bookings = array_map(function (Booking $booking) {
             return [
-                'date' => $booking->getDate()->format('Y-m-d H:i:s'),
+                'date' => $booking->getDate()->format('Y-m-d H:i'),
                 'patient' => $booking->getPatient(),
             ];
         }, $bookings);
 
         return new JsonResponse([
-            'doctor' => $request->get('doctor_id'),
+            'doctor_id' => $request->get('doctor_id'),
             'bookings' => $bookings,
         ]);
     }

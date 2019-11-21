@@ -153,9 +153,30 @@ final class BookingControllerTest extends JsonApiTestCase
         $this->assertResponse($response, 'booking/booked_response', Response::HTTP_OK);
     }
 
+    /**
+     * @test
+     */
+    public function gets_existing_bookings_for_doctor(): void
+    {
+        $fixtures = $this->loadFixturesFromFile('bookings.yml');
+        /** @var Doctor $doctor */
+        $doctor = $fixtures['doctor'];
+
+        $this->client->request('GET', $this->getBookingsUrl($doctor->getId()->toString()));
+
+        $response = $this->client->getResponse();
+
+        $this->assertResponse($response, 'booking/get_bookings_response', Response::HTTP_OK);
+    }
+
     private function getBookDoctorPatientUrl(string $doctorId, string $date): string
     {
         return sprintf('/book?doctor_id=%s&date=%s', $doctorId, $date);
+    }
+
+    private function getBookingsUrl(string $doctorId): string
+    {
+        return sprintf('/bookings?doctor_id=%s', $doctorId);
     }
 
     private function doctorsDateTimeIsReserved(): void
