@@ -53,6 +53,13 @@ final class AvailabilityMother
         return $this;
     }
 
+    public function notReserved(): self
+    {
+        $this->reserved = false;
+
+        return $this;
+    }
+
     public function get(): Availability
     {
         return new Availability($this->duration, $this->exists, $this->startFrom, $this->reserved);

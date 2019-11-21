@@ -4,29 +4,33 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Entity\Doctor;
+use DateTime;
 
 class BookingHelper
 {
     public function create(string $date, Doctor $doctor, ?string $patient): array
     {
         $errors = [];
-        $monthAgo = (new \DateTime)->modify('-1 month');
+        $date = new DateTime($date);
 
-        if (false === $doctor->getIsPremium() && $monthAgo > $doctor->getRegisteredAt()) {
+        if (false === $doctor->getIsPremium()) {
             $errors['notPremium'] = true;
-            $errors['registeredRecently'] = true;
         }
 
         if (false === $doctor->getIsActive()) {
             $errors['notActive'] = true;
         }
 
+        if ($date < new DateTime('now')) {
+            $errors['dateFromThePast'] = true;
+        }
+
         if ([] !== $errors) {
-            return array_merge(['ok' => false], $errors);
+            return array_merge(['ok' => false], ['errors' => $errors]);
         }
 
         return array_merge(['ok' => true], [
-            'date' => new \DateTime($date),
+            'date' => $date,
             'doctor' => $doctor,
             'patient' => $patient,
         ]);

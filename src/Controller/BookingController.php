@@ -10,6 +10,7 @@ use App\SDK\AvailabilityApiClient\AvailabilityApiClientInterface;
 use App\SDK\AvailabilityApiClient\IO\Doctor as SdkDoctor;
 use App\Service\BookingHelper;
 use App\Service\BookingValidator;
+use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\ORM\EntityManager;
 use Ramsey\Uuid\Uuid;
@@ -42,9 +43,10 @@ class BookingController extends Controller
 
         /** @var AvailabilityApiClientInterface $availabilityApi */
         $availabilityApi = $this->get(AvailabilityApiClientInterface::class);
+
         $availability = $availabilityApi->getAvailabilityInformation(
             new SdkDoctor($doctorId),
-            new \DateTimeImmutable($date)
+            new DateTimeImmutable($date)
         );
 
         if (false === $availability->exists() || $availability->reserved()) {
@@ -58,7 +60,7 @@ class BookingController extends Controller
         $validator = $this->get(BookingValidator::class);
         $bookingStatus = $validator->checkIfValid($booking);
 
-        if ($bookingStatus) {
+        if ($bookingStatus === true) {
             $booking = new Booking;
             $booking->setDoctor($doctor);
             $booking->setPatient($patient);

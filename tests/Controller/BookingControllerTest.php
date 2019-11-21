@@ -9,6 +9,7 @@ use App\Entity\Doctor;
 use App\SDK\AvailabilityApiClient\AvailabilityApiClientInterface;
 use App\SDK\AvailabilityApiClient\IO\Availability;
 use App\Tests\ObjectMother\AvailabilityClient\AvailabilityMother;
+use DateTime;
 use Prophecy\Argument;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -19,11 +20,15 @@ final class BookingControllerTest extends JsonApiTestCase
     /** @var AvailabilityApiClientInterface */
     private $availability;
 
+    /** @var string */
+    private $tomorrowDate;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->availability = $this->prophesize(AvailabilityApiClientInterface::class);
+        $this->tomorrowDate = (new DateTime())->modify('+1 day')->format('Y-m-d H:i');
 
         static::$kernel->getContainer()->set(AvailabilityApiClientInterface::class, $this->availability->reveal());
     }
@@ -33,7 +38,7 @@ final class BookingControllerTest extends JsonApiTestCase
      */
     public function returns_not_found_response_when_book_for_doctor_which_does_not_exist(): void
     {
-        $this->client->request('POST', $this->getBookDoctorPatientUrl(self::MISSING_DOCTOR_ID));
+        $this->client->request('POST', $this->getBookDoctorPatientUrl(self::MISSING_DOCTOR_ID, $this->tomorrowDate));
 
         $response = $this->client->getResponse();
 
@@ -47,15 +52,15 @@ final class BookingControllerTest extends JsonApiTestCase
     {
         $fixture = $this->loadFixturesFromFile('doctors.yml');
         /** @var Doctor $doctor */
-        $doctor = $fixture['doctor_001'];
+        $doctor = $fixture['doctor_ok'];
 
         $this->doctorsDateTimeIsReserved();
 
-        $this->client->request('POST', $this->getBookDoctorPatientUrl($doctor->getId()->toString()));
+        $this->client->request('POST', $this->getBookDoctorPatientUrl($doctor->getId()->toString(), $this->tomorrowDate));
 
         $response = $this->client->getResponse();
 
-        $this->assertResponse($response, 'availability/not_available', Response::HTTP_OK);
+        $this->assertResponse($response, 'availability/not_available_response', Response::HTTP_OK);
     }
 
     /**
@@ -65,20 +70,92 @@ final class BookingControllerTest extends JsonApiTestCase
     {
         $fixture = $this->loadFixturesFromFile('doctors.yml');
         /** @var Doctor $doctor */
-        $doctor = $fixture['doctor_001'];
+        $doctor = $fixture['doctor_ok'];
 
         $this->doctorsDateTimeMissingInCalendar();
 
-        $this->client->request('POST', $this->getBookDoctorPatientUrl($doctor->getId()->toString()));
+        $this->client->request('POST', $this->getBookDoctorPatientUrl($doctor->getId()->toString(), $this->tomorrowDate));
 
         $response = $this->client->getResponse();
 
-        $this->assertResponse($response, 'availability/not_available', Response::HTTP_OK);
+        $this->assertResponse($response, 'availability/not_available_response', Response::HTTP_OK);
     }
 
-    private function getBookDoctorPatientUrl(string $doctorId): string
+    /**
+     * @test
+     */
+    public function cannot_book_when_doctor_is_not_premium(): void
     {
-        return sprintf('/book?doctor_id=%s', $doctorId);
+        $fixture = $this->loadFixturesFromFile('doctors.yml');
+        /** @var Doctor $doctor */
+        $doctor = $fixture['doctor_without_premium'];
+
+        $this->doctorsDateTimeAvailable();
+
+        $this->client->request('POST', $this->getBookDoctorPatientUrl($doctor->getId()->toString(), $this->tomorrowDate));
+
+        $response = $this->client->getResponse();
+
+        $this->assertResponse($response, 'booking/cannot_when_doctor_not_premium_response', Response::HTTP_OK);
+    }
+
+    /**
+     * @test
+     */
+    public function cannot_book_when_doctor_is_not_active(): void
+    {
+        $fixture = $this->loadFixturesFromFile('doctors.yml');
+        /** @var Doctor $doctor */
+        $doctor = $fixture['doctor_not_active'];
+
+        $this->doctorsDateTimeAvailable();
+
+        $this->client->request('POST', $this->getBookDoctorPatientUrl($doctor->getId()->toString(), $this->tomorrowDate));
+
+        $response = $this->client->getResponse();
+
+        $this->assertResponse($response, 'booking/cannot_when_doctor_not_active_response', Response::HTTP_OK);
+    }
+
+    /**
+     * @test
+     */
+    public function cannot_book_when_date_from_past(): void
+    {
+        $fixture = $this->loadFixturesFromFile('doctors.yml');
+        /** @var Doctor $doctor */
+        $doctor = $fixture['doctor_ok'];
+
+        $this->doctorsDateTimeAvailable();
+
+        $this->client->request('POST', $this->getBookDoctorPatientUrl($doctor->getId()->toString(), '2010-01-01 10:00'));
+
+        $response = $this->client->getResponse();
+
+        $this->assertResponse($response, 'booking/cannot_when_date_from_past_response', Response::HTTP_OK);
+    }
+
+    /**
+     * @test
+     */
+    public function booked_successfully(): void
+    {
+        $fixture = $this->loadFixturesFromFile('doctors.yml');
+        /** @var Doctor $doctor */
+        $doctor = $fixture['doctor_ok'];
+
+        $this->doctorsDateTimeAvailable();
+
+        $this->client->request('POST', $this->getBookDoctorPatientUrl($doctor->getId()->toString(), $this->tomorrowDate));
+
+        $response = $this->client->getResponse();
+
+        $this->assertResponse($response, 'booking/booked_response', Response::HTTP_OK);
+    }
+
+    private function getBookDoctorPatientUrl(string $doctorId, string $date): string
+    {
+        return sprintf('/book?doctor_id=%s&date=%s', $doctorId, $date);
     }
 
     private function doctorsDateTimeIsReserved(): void
@@ -102,6 +179,19 @@ final class BookingControllerTest extends JsonApiTestCase
         )->willReturn(
             AvailabilityMother::make()
                 ->missing()
+                ->get()
+        );
+    }
+
+    private function doctorsDateTimeAvailable(): void
+    {
+        $this->availability->getAvailabilityInformation(
+            Argument::type(\App\SDK\AvailabilityApiClient\IO\Doctor::class),
+            Argument::type(\DateTimeImmutable::class)
+        )->willReturn(
+            AvailabilityMother::make()
+                ->existing()
+                ->notReserved()
                 ->get()
         );
     }
