@@ -42,6 +42,13 @@ class Doctor
      */
     private $registeredAt;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", nullable=false)
+     */
+    private $email;
+
     public function getId(): UuidInterface
     {
         return $this->id;
@@ -80,5 +87,15 @@ class Doctor
     public function setRegisteredAt(DateTime $registeredAt): void
     {
         $this->registeredAt = $registeredAt;
+    }
+
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): void
+    {
+        $this->email = $email;
     }
 }

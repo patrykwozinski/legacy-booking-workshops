@@ -28,7 +28,7 @@ class EventSubscriber
 
 		$message = (new \Swift_Message('Booking confirmation'))
 			->setFrom('info@docplanner.com')
-			->setTo('radek.baczynski@docplanner.com')
+			->setTo($doctor->getEmail())
 			->setBody(
 				$this->twig->render(
 					'booked.html.twig',
