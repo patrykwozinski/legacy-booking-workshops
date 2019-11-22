@@ -36,7 +36,7 @@ final class BookingControllerTest extends JsonApiTestCase
     /**
      * @test
      */
-    public function returns_not_found_response_when_book_for_doctor_which_does_not_exist(): void
+    public function not_found_when_book_for_not_existing_doctor(): void
     {
         $this->client->request('POST', $this->getBookDoctorPatientUrl(self::MISSING_DOCTOR_ID, $this->tomorrowDate));
 
