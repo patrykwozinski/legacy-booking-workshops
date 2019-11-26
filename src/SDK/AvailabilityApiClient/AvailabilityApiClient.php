@@ -14,4 +14,14 @@ final class AvailabilityApiClient implements AvailabilityApiClientInterface
 	{
 		return new Availability(Duration::inMinutes(30), true, $when, false);
 	}
+
+	public function reserve(Doctor $doctor, \DateTimeImmutable $when): void
+	{
+		// ...
+	}
+
+	public function cancelReservation(Doctor $doctor, \DateTimeImmutable $when): void
+	{
+		// ...
+	}
 }

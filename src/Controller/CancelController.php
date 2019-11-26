@@ -5,6 +5,8 @@ namespace App\Controller;
 
 use App\Entity\Booking;
 use App\Entity\Doctor as DoctorEntity;
+use App\SDK\AvailabilityApiClient\AvailabilityApiClientInterface;
+use App\SDK\AvailabilityApiClient\IO\Doctor as SdkDoctor;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Ramsey\Uuid\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -26,6 +28,8 @@ class CancelController extends Controller
 
 		/** @var Registry $em */
 		$em = $this->get('doctrine');
+		/** @var AvailabilityApiClientInterface $availabilityApi */
+		$availabilityApi = $this->get(AvailabilityApiClientInterface::class);
 		/** @var DoctorEntity $doctor */
 		$doctor = $em->getRepository(DoctorEntity::class)->find(Uuid::fromString($doctorId));
 		/** @var DoctorEntity $doctor */
@@ -50,6 +54,7 @@ class CancelController extends Controller
 
 		$em->getManager()->remove($booking);
 		$em->getManager()->flush();
+		$availabilityApi->cancelReservation(new SdkDoctor($doctorId), new DateTimeImmutable($date));
 
 		return new JsonResponse([
 			'message' => 'Booking was successfully canceled!',
