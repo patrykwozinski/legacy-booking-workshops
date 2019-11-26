@@ -27,6 +27,7 @@ final class GetBookingsController extends Controller
 
         $bookings = array_map(function (Booking $booking) {
             return [
+                'id' => $booking->getId(),
                 'date' => $booking->getDate()->format('Y-m-d H:i'),
                 'patient' => $booking->getPatient(),
             ];
