@@ -7,13 +7,12 @@ namespace App\Tests\Controller;
 use ApiTestCase\JsonApiTestCase;
 use App\Entity\Doctor;
 use App\SDK\AvailabilityApiClient\AvailabilityApiClientInterface;
-use App\SDK\AvailabilityApiClient\IO\Availability;
 use App\Tests\ObjectMother\AvailabilityClient\AvailabilityMother;
 use DateTime;
 use Prophecy\Argument;
 use Symfony\Component\HttpFoundation\Response;
 
-final class BookingControllerTest extends JsonApiTestCase
+final class BookControllerTest extends JsonApiTestCase
 {
     private const MISSING_DOCTOR_ID = '673519ef-07c1-446e-ac2e-ce14d7a2dcc4';
 
@@ -42,7 +41,7 @@ final class BookingControllerTest extends JsonApiTestCase
 
         $response = $this->client->getResponse();
 
-        $this->assertResponse($response, 'error/not_found_response', Response::HTTP_I_AM_A_TEAPOT);
+        $this->assertResponse($response, 'error/not_found_response', Response::HTTP_NOT_FOUND);
     }
 
     /**
@@ -60,7 +59,7 @@ final class BookingControllerTest extends JsonApiTestCase
 
         $response = $this->client->getResponse();
 
-        $this->assertResponse($response, 'availability/not_available_response', Response::HTTP_OK);
+        $this->assertResponse($response, 'availability/not_available_response', Response::HTTP_BAD_REQUEST);
     }
 
     /**
@@ -78,7 +77,7 @@ final class BookingControllerTest extends JsonApiTestCase
 
         $response = $this->client->getResponse();
 
-        $this->assertResponse($response, 'availability/not_available_response', Response::HTTP_OK);
+        $this->assertResponse($response, 'availability/not_available_response', Response::HTTP_BAD_REQUEST);
     }
 
     /**
@@ -96,7 +95,7 @@ final class BookingControllerTest extends JsonApiTestCase
 
         $response = $this->client->getResponse();
 
-        $this->assertResponse($response, 'booking/cannot_when_doctor_not_premium_response', Response::HTTP_OK);
+        $this->assertResponse($response, 'booking/cannot_when_doctor_not_premium_response', Response::HTTP_BAD_REQUEST);
     }
 
     /**
@@ -114,7 +113,7 @@ final class BookingControllerTest extends JsonApiTestCase
 
         $response = $this->client->getResponse();
 
-        $this->assertResponse($response, 'booking/cannot_when_doctor_not_active_response', Response::HTTP_OK);
+        $this->assertResponse($response, 'booking/cannot_when_doctor_not_active_response', Response::HTTP_BAD_REQUEST);
     }
 
     /**
@@ -132,7 +131,7 @@ final class BookingControllerTest extends JsonApiTestCase
 
         $response = $this->client->getResponse();
 
-        $this->assertResponse($response, 'booking/cannot_when_date_from_past_response', Response::HTTP_OK);
+        $this->assertResponse($response, 'booking/cannot_when_date_from_past_response', Response::HTTP_BAD_REQUEST);
     }
 
     /**
@@ -153,30 +152,9 @@ final class BookingControllerTest extends JsonApiTestCase
         $this->assertResponse($response, 'booking/booked_response', Response::HTTP_OK);
     }
 
-    /**
-     * @test
-     */
-    public function gets_existing_bookings_for_doctor(): void
-    {
-        $fixtures = $this->loadFixturesFromFile('bookings.yml');
-        /** @var Doctor $doctor */
-        $doctor = $fixtures['doctor'];
-
-        $this->client->request('GET', $this->getBookingsUrl($doctor->getId()->toString()));
-
-        $response = $this->client->getResponse();
-
-        $this->assertResponse($response, 'booking/get_bookings_response', Response::HTTP_OK);
-    }
-
     private function getBookDoctorPatientUrl(string $doctorId, string $date): string
     {
         return sprintf('/book?doctor_id=%s&date=%s', $doctorId, $date);
-    }
-
-    private function getBookingsUrl(string $doctorId): string
-    {
-        return sprintf('/bookings?doctor_id=%s', $doctorId);
     }
 
     private function doctorsDateTimeIsReserved(): void

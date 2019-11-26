@@ -13,7 +13,6 @@ use App\Service\BookingHelper;
 use App\Service\BookingValidator;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Registry;
-use Doctrine\ORM\EntityManager;
 use Ramsey\Uuid\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -21,8 +20,11 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class BookingController extends Controller
+final class BookController extends Controller
 {
+    /**
+     * @Route( "/book", methods={"POST"})
+     */
     public function bookVisit(Request $request): JsonResponse
     {
         $date = $request->get('date') ?? '';
@@ -39,7 +41,7 @@ class BookingController extends Controller
         if (!$doctor) {
             return new JsonResponse([
                 'message' => 'doctor not found',
-            ], JsonResponse::HTTP_I_AM_A_TEAPOT);
+            ], JsonResponse::HTTP_NOT_FOUND);
         }
 
         /** @var BookingHelper $bookingHelper */
@@ -58,7 +60,7 @@ class BookingController extends Controller
             return new JsonResponse([
                 'message' => 'Given date does not exists in calendar or is reserved',
                 'doctor_id' => $doctorId,
-            ]);
+            ], JsonResponse::HTTP_BAD_REQUEST);
         }
 
         /** @var BookingValidator $validator */
@@ -79,7 +81,7 @@ class BookingController extends Controller
             $event->doctorId = $doctorId;
             $event->doctor = $doctor;
 
-			$ed->dispatch($event);
+            $ed->dispatch($event);
 
             return new JsonResponse([
                 'message' => 'Booked!',
@@ -90,28 +92,6 @@ class BookingController extends Controller
         return new JsonResponse([
             'message' => 'Cannot book visit with errors: ' . $bookingStatus,
             'doctor_id' => $doctorId,
-        ]);
-    }
-
-    public function getBookings(Request $request): JsonResponse
-    {
-        /** @var EntityManager $em */
-        $em = $this->get('doctrine');
-
-        $bookings = $em->getRepository(Booking::class)->findBy([
-            'doctor' => $request->get('doctor_id'),
-        ]);
-
-        $bookings = array_map(function (Booking $booking) {
-            return [
-                'date' => $booking->getDate()->format('Y-m-d H:i'),
-                'patient' => $booking->getPatient(),
-            ];
-        }, $bookings);
-
-        return new JsonResponse([
-            'doctor_id' => $request->get('doctor_id'),
-            'bookings' => $bookings,
-        ]);
+        ], JsonResponse::HTTP_BAD_REQUEST);
     }
 }
