@@ -18,9 +18,9 @@ class CancelController extends Controller
 	/**
 	 * @Route( "/cancel-booking")
 	 */
-	public function cancelBooking(Request $request): JsonResponse
+	public function __invoke(Request $request): JsonResponse
 	{
-		$date     = $request->get('date') ?? '';
+		$date     = new \DateTime($request->get('date') ?? 'now');
 		$doctorId = $request->get('doctor_id') ?? '';
 		$patient  = $request->get('patient') ?? '';
 
@@ -32,8 +32,14 @@ class CancelController extends Controller
 		$booking = $em->getRepository(Booking::class)->findOneBy([
 			'doctor'  => $doctor,
 			'patient' => $patient,
-			'date'    => new \DateTime($date),
+			'date'    => $date,
 		]);
+
+		if ($date->getTimestamp() <= time()) {
+			return new JsonResponse([
+				'message' => 'Unable to cancel booking from the past.',
+			], Response::HTTP_NOT_FOUND);
+		}
 
 		if (!$doctor || !$booking)
 		{
