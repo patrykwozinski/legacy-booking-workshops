@@ -7,6 +7,7 @@ namespace App\Tests\Controller;
 use ApiTestCase\JsonApiTestCase;
 use App\Entity\Doctor;
 use App\SDK\AvailabilityApiClient\AvailabilityApiClientInterface;
+use App\SDK\AvailabilityApiClient\IO\Doctor as SdkDoctor;
 use App\Tests\ObjectMother\AvailabilityClient\AvailabilityMother;
 use DateTime;
 use Prophecy\Argument;
@@ -143,6 +144,10 @@ final class BookControllerTest extends JsonApiTestCase
         /** @var Doctor $doctor */
         $doctor = $fixture['doctor_ok'];
 
+        $this->availability->reserve(
+            new SdkDoctor($doctor->getId()->toString()),
+            new \DateTimeImmutable($this->tomorrowDate)
+        );
         $this->doctorsDateTimeAvailable();
 
         $this->client->request('POST', $this->getBookDoctorPatientUrl($doctor->getId()->toString(), $this->tomorrowDate));
@@ -160,7 +165,7 @@ final class BookControllerTest extends JsonApiTestCase
     private function doctorsDateTimeIsReserved(): void
     {
         $this->availability->getAvailabilityInformation(
-            Argument::type(\App\SDK\AvailabilityApiClient\IO\Doctor::class),
+            Argument::type(SdkDoctor::class),
             Argument::type(\DateTimeImmutable::class)
         )->willReturn(
             AvailabilityMother::make()
@@ -173,7 +178,7 @@ final class BookControllerTest extends JsonApiTestCase
     private function doctorsDateTimeMissingInCalendar(): void
     {
         $this->availability->getAvailabilityInformation(
-            Argument::type(\App\SDK\AvailabilityApiClient\IO\Doctor::class),
+            Argument::type(SdkDoctor::class),
             Argument::type(\DateTimeImmutable::class)
         )->willReturn(
             AvailabilityMother::make()
@@ -185,7 +190,7 @@ final class BookControllerTest extends JsonApiTestCase
     private function doctorsDateTimeAvailable(): void
     {
         $this->availability->getAvailabilityInformation(
-            Argument::type(\App\SDK\AvailabilityApiClient\IO\Doctor::class),
+            Argument::type(SdkDoctor::class),
             Argument::type(\DateTimeImmutable::class)
         )->willReturn(
             AvailabilityMother::make()
