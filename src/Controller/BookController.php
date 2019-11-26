@@ -74,7 +74,7 @@ final class BookController extends Controller
             $booking->setDate(new \DateTime($date));
             $em->getManager()->persist($booking);
             $em->getManager()->flush();
-			$availabilityApi->reserve(new SdkDoctor($doctorId), new DateTimeImmutable($date));
+            $availabilityApi->reserve(new SdkDoctor($doctorId), new DateTimeImmutable($date));
 
             $event = new BookedEvent;
             $event->date = new \DateTime($date);
