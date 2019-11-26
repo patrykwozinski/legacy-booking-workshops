@@ -146,7 +146,7 @@ final class BookControllerTest extends JsonApiTestCase
 
         $this->availability->reserve(
             new SdkDoctor($doctor->getId()->toString()),
-            new \DateTimeImmutable($this->tomorrowDate)
+            new \DateTime($this->tomorrowDate)
         );
         $this->doctorsDateTimeAvailable();
 
@@ -166,7 +166,7 @@ final class BookControllerTest extends JsonApiTestCase
     {
         $this->availability->getAvailabilityInformation(
             Argument::type(SdkDoctor::class),
-            Argument::type(\DateTimeImmutable::class)
+            Argument::type(\DateTime::class)
         )->willReturn(
             AvailabilityMother::make()
                 ->existing()
@@ -179,7 +179,7 @@ final class BookControllerTest extends JsonApiTestCase
     {
         $this->availability->getAvailabilityInformation(
             Argument::type(SdkDoctor::class),
-            Argument::type(\DateTimeImmutable::class)
+            Argument::type(\DateTime::class)
         )->willReturn(
             AvailabilityMother::make()
                 ->missing()
@@ -191,7 +191,7 @@ final class BookControllerTest extends JsonApiTestCase
     {
         $this->availability->getAvailabilityInformation(
             Argument::type(SdkDoctor::class),
-            Argument::type(\DateTimeImmutable::class)
+            Argument::type(\DateTime::class)
         )->willReturn(
             AvailabilityMother::make()
                 ->existing()

@@ -3,12 +3,11 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+
 use App\Entity\Booking;
-use App\Entity\Doctor as DoctorEntity;
 use App\SDK\AvailabilityApiClient\AvailabilityApiClientInterface;
 use App\SDK\AvailabilityApiClient\IO\Doctor as SdkDoctor;
 use Doctrine\Bundle\DoctrineBundle\Registry;
-use Ramsey\Uuid\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,38 +21,32 @@ class CancelController extends Controller
      */
     public function __invoke(Request $request): JsonResponse
     {
-        $date = new \DateTime($request->get('date') ?? 'now');
-        $doctorId = $request->get('doctor_id') ?? '';
-        $patient = $request->get('patient') ?? '';
+        $bookingId = $request->get('booking_id') ?? '';
 
         /** @var Registry $em */
         $em = $this->get('doctrine');
         /** @var AvailabilityApiClientInterface $availabilityApi */
         $availabilityApi = $this->get(AvailabilityApiClientInterface::class);
-        /** @var DoctorEntity $doctor */
-        $doctor = $em->getRepository(DoctorEntity::class)->find(Uuid::fromString($doctorId));
-        /** @var DoctorEntity $doctor */
+        /** @var Booking $booking */
         $booking = $em->getRepository(Booking::class)->findOneBy([
-            'doctor' => $doctor,
-            'patient' => $patient,
-            'date' => $date,
+            'id' => $bookingId,
         ]);
 
-        if ($date->getTimestamp() <= time()) {
-            return new JsonResponse([
-                'message' => 'Unable to cancel booking from the past.',
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        if (!$doctor || !$booking) {
+        if (!$booking) {
             return new JsonResponse([
                 'message' => 'Booking does not exists!',
             ], Response::HTTP_NOT_FOUND);
         }
 
+        if ($booking->getDate() <= time()) {
+            return new JsonResponse([
+                'message' => 'Unable to cancel booking from the past.',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
         $em->getManager()->remove($booking);
         $em->getManager()->flush();
-        $availabilityApi->cancelReservation(new SdkDoctor($doctorId), new DateTimeImmutable($date));
+        $availabilityApi->cancelReservation(new SdkDoctor($booking->getDoctor()->getId()->toString()), $booking->getDate());
 
         return new JsonResponse([
             'message' => 'Booking was successfully canceled!',

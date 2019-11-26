@@ -9,9 +9,9 @@ use App\SDK\AvailabilityApiClient\IO\Doctor;
 
 interface AvailabilityApiClientInterface
 {
-    public function getAvailabilityInformation(Doctor $doctor, \DateTimeImmutable $when): Availability;
+    public function getAvailabilityInformation(Doctor $doctor, \DateTime $when): Availability;
 
-    public function reserve(Doctor $doctor, \DateTimeImmutable $when): void;
+    public function reserve(Doctor $doctor, \DateTime $when): void;
 
-    public function cancelReservation(Doctor $doctor, \DateTimeImmutable $when): void;
+    public function cancelReservation(Doctor $doctor, \DateTime $when): void;
 }

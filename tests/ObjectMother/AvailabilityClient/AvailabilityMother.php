@@ -6,7 +6,7 @@ namespace App\Tests\ObjectMother\AvailabilityClient;
 
 use App\SDK\AvailabilityApiClient\IO\Availability;
 use App\SDK\AvailabilityApiClient\IO\Duration;
-use DateTimeImmutable;
+use DateTime;
 
 final class AvailabilityMother
 {
@@ -14,7 +14,7 @@ final class AvailabilityMother
     private $duration;
     /** @var bool */
     private $exists;
-    /** @var DateTimeImmutable */
+    /** @var DateTime */
     private $startFrom;
     /** @var bool */
     private $reserved;
@@ -23,7 +23,7 @@ final class AvailabilityMother
     {
         $this->duration = Duration::inMinutes(60);
         $this->exists = false;
-        $this->startFrom = new DateTimeImmutable('now');
+        $this->startFrom = new DateTime('now');
         $this->reserved = false;
     }
 

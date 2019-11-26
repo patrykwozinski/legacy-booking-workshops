@@ -11,7 +11,7 @@ use App\SDK\AvailabilityApiClient\AvailabilityApiClientInterface;
 use App\SDK\AvailabilityApiClient\IO\Doctor as SdkDoctor;
 use App\Service\BookingHelper;
 use App\Service\BookingValidator;
-use DateTimeImmutable;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Ramsey\Uuid\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -53,7 +53,7 @@ final class BookController extends Controller
 
         $availability = $availabilityApi->getAvailabilityInformation(
             new SdkDoctor($doctorId),
-            new DateTimeImmutable($date)
+            new DateTime($date)
         );
 
         if (false === $availability->exists() || $availability->reserved()) {
@@ -75,7 +75,7 @@ final class BookController extends Controller
             $em->getManager()->persist($booking);
             $em->getManager()->flush();
 
-            $availabilityApi->reserve(new SdkDoctor($doctorId), new DateTimeImmutable($date));
+            $availabilityApi->reserve(new SdkDoctor($doctorId), new DateTime($date));
 
             $event = new BookedEvent;
             $event->date = new \DateTime($date);

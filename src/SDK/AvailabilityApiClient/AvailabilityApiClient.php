@@ -10,17 +10,17 @@ use App\SDK\AvailabilityApiClient\IO\Duration;
 
 final class AvailabilityApiClient implements AvailabilityApiClientInterface
 {
-    public function getAvailabilityInformation(Doctor $doctor, \DateTimeImmutable $when): Availability
+    public function getAvailabilityInformation(Doctor $doctor, \DateTime $when): Availability
     {
         return new Availability(Duration::inMinutes(30), true, $when, false);
     }
 
-    public function reserve(Doctor $doctor, \DateTimeImmutable $when): void
+    public function reserve(Doctor $doctor, \DateTime $when): void
     {
         // ...
     }
 
-    public function cancelReservation(Doctor $doctor, \DateTimeImmutable $when): void
+    public function cancelReservation(Doctor $doctor, \DateTime $when): void
     {
         // ...
     }
