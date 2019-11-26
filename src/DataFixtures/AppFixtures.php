@@ -43,6 +43,7 @@ class AppFixtures extends Fixture
 		$booking->setDoctor($doctor1);
 		$booking->setDate(new \DateTime('2019-01-02 12:00:00'));
 		$booking->setPatient('Jan Kowalski');
+		$manager->persist($booking);
 
         $manager->flush();
     }
