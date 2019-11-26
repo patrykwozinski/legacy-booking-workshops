@@ -40,6 +40,22 @@ final class CancelControllerTest extends JsonApiTestCase
         $this->assertResponse($response, 'error/not_found_response', Response::HTTP_NOT_FOUND);
     }
 
+    /**
+     * @test
+     */
+    public function future_booking_canceled(): void
+    {
+        $fixtures = $this->loadFixturesFromFile('bookings.yml');
+        /** @var Booking $booking */
+        $booking = $fixtures['future_booking'];
+
+        $this->client->request('POST', $this->getCancelBookingUrl($booking->getId()->toString()));
+
+        $response = $this->client->getResponse();
+
+        $this->assertResponse($response, 'booking/canceled_response', Response::HTTP_OK);
+    }
+
     private function getCancelBookingUrl(string $bookingId): string
     {
         return sprintf('/cancel-booking?booking_id=%s', $bookingId);

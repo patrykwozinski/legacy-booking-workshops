@@ -50,6 +50,6 @@ class CancelController extends Controller
 
         return new JsonResponse([
             'message' => 'Booking was successfully canceled!',
-        ]);
+        ], JsonResponse::HTTP_OK);
     }
 }
