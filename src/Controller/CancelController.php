@@ -38,7 +38,7 @@ class CancelController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
 
-        if ($booking->getDate() <= time()) {
+        if ($booking->getDate()->getTimestamp() <= time()) {
             return new JsonResponse([
                 'message' => 'Unable to cancel booking from the past.',
             ], Response::HTTP_NOT_FOUND);

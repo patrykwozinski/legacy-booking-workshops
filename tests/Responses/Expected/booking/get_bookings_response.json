@@ -10,11 +10,6 @@
       "id": @uuid@,
       "date": @string@,
       "patient": @string@
-    },
-    {
-      "id": @uuid@,
-      "date": @string@,
-      "patient": @string@
     }
   ]
 }

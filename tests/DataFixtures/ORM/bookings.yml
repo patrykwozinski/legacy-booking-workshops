@@ -7,8 +7,14 @@ App\Entity\Doctor:
     registered_at: <(new \DateTime())>
 
 App\Entity\Booking:
-  booking_{1..3}:
+  past_booking:
     id: <(\Ramsey\Uuid\Uuid::uuid4())>
     doctor: '@doctor'
     patient: '<firstName()> <lastName()>'
-    date: <dateTimeBetween('-30 days', 'now')>
+    date: <dateTimeBetween('-30 days', '-1 day')>
+
+  future_booking:
+    id: <(\Ramsey\Uuid\Uuid::uuid4())>
+    doctor: '@doctor'
+    patient: '<firstName()> <lastName()>'
+    date: <dateTimeBetween('+1 day', '+30 days')>
