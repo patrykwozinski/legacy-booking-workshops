@@ -86,7 +86,7 @@ final class BookController extends Controller
             $ed->dispatch($event);
 
             return new JsonResponse([
-                'message' => 'Booked!',
+                'message' => 'Your reservation was booked',
                 'booking_id' => $booking->getId()->toString(),
             ]);
         }

@@ -1,4 +1,4 @@
 {
-  "message": "Booked!",
+  "message": "Your reservation was booked",
   "booking_id": @uuid@
 }
