@@ -7,5 +7,4 @@ class BookedEvent
 	public $date;
 	public $bookingId;
 	public $doctorId;
-	public $doctor;
 }

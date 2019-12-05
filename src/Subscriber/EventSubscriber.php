@@ -2,41 +2,37 @@
 
 namespace App\Subscriber;
 
-use App\Entity\Doctor as DoctorEntity;
 use App\Event\BookedEvent;
 use Doctrine\Common\Persistence\ManagerRegistry;
-use Ramsey\Uuid\Uuid;
 use Twig\Environment;
 
 class EventSubscriber
 {
-	protected $mailer;
-	protected $twig;
-	protected $em;
+    private const DOCTOR_FAKE_EMAIL = 'patryk.wozinski@docplanner.com';
+    protected $mailer;
+    protected $twig;
+    protected $em;
 
-	public function __construct(\Swift_Mailer $mailer, Environment $twig, ManagerRegistry $registry)
-	{
-		$this->mailer = $mailer;
-		$this->twig   = $twig;
-		$this->em     = $registry->getManager();
-	}
+    public function __construct(\Swift_Mailer $mailer, Environment $twig, ManagerRegistry $registry)
+    {
+        $this->mailer = $mailer;
+        $this->twig = $twig;
+        $this->em = $registry->getManager();
+    }
 
-	public function onBookedEvent(BookedEvent $event)
-	{
-		/** @var DoctorEntity $doctor */
-		$doctor = $this->em->getRepository(DoctorEntity::class)->find(Uuid::fromString($event->doctor->getId()));
+    public function onBookedEvent(BookedEvent $event)
+    {
+        $message = (new \Swift_Message('Booking confirmation'))
+            ->setFrom('info@docplanner.com')
+            ->setTo(self::DOCTOR_FAKE_EMAIL)
+            ->setBody(
+                $this->twig->render(
+                    'booked.html.twig',
+                    ['date' => $event->date, 'doctor' => $event->doctorId]
+                ),
+                'text/html'
+            );
 
-		$message = (new \Swift_Message('Booking confirmation'))
-			->setFrom('info@docplanner.com')
-			->setTo($doctor->getEmail())
-			->setBody(
-				$this->twig->render(
-					'booked.html.twig',
-					['date' => $event->date, 'doctor' => $doctor]
-				),
-				'text/html'
-			);
-
-		$this->mailer->send($message);
-	}
+        $this->mailer->send($message);
+    }
 }

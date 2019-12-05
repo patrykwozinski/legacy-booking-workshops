@@ -6,8 +6,6 @@ namespace App\Entity;
 
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Mapping\JoinColumn;
-use Doctrine\ORM\Mapping\ManyToOne;
 use Ramsey\Uuid\UuidInterface;
 
 /**
@@ -26,14 +24,6 @@ class Booking
     private $id;
 
     /**
-     * @var Doctor
-     *
-     * @ManyToOne(targetEntity="Doctor", inversedBy="bookings")
-     * @JoinColumn(name="doctor_id", referencedColumnName="id", onDelete="CASCADE")
-     */
-    private $doctor;
-
-    /**
      * @var string
      *
      * @ORM\Column(type="string", nullable=false)
@@ -47,6 +37,13 @@ class Booking
      */
     private $date;
 
+    /**
+     * @var UuidInterface
+     *
+     * @ORM\Column(type="uuid", unique=false)
+     */
+    private $doctorId;
+
     public function getId(): UuidInterface
     {
         return $this->id;
@@ -55,11 +52,6 @@ class Booking
     public function setId(UuidInterface $id): void
     {
         $this->id = $id;
-    }
-
-    public function setDoctor(Doctor $doctor): void
-    {
-        $this->doctor = $doctor;
     }
 
     public function setPatient(string $patient): void
@@ -82,8 +74,13 @@ class Booking
         return $this->date;
     }
 
-    public function getDoctor(): Doctor
+    public function setDoctorId(UuidInterface $doctorId): void
     {
-        return $this->doctor;
+        $this->doctorId = $doctorId;
+    }
+
+    public function getDoctorId(): UuidInterface
+    {
+        return $this->doctorId;
     }
 }

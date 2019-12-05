@@ -5,7 +5,6 @@ namespace App\UI\Controller;
 
 
 use App\Entity\Booking;
-use App\Entity\Doctor as DoctorEntity;
 use App\Event\BookedEvent;
 use App\SDK\AvailabilityApiClient\AvailabilityApiClientInterface;
 use App\SDK\AvailabilityApiClient\IO\Doctor as SdkDoctor;
@@ -33,20 +32,12 @@ final class BookController extends Controller
 
         /** @var Registry $em */
         $em = $this->get('doctrine');
-        /** @var DoctorEntity $doctor */
-        $doctor = $em->getRepository(DoctorEntity::class)->find(Uuid::fromString($doctorId));
         /** @var EventDispatcherInterface $ed */
         $ed = $this->get('event_dispatcher');
 
-        if (!$doctor) {
-            return new JsonResponse([
-                'message' => 'doctor not found',
-            ], JsonResponse::HTTP_NOT_FOUND);
-        }
-
         /** @var BookingHelper $bookingHelper */
         $bookingHelper = $this->get(BookingHelper::class);
-        $booking = $bookingHelper->create($date, $doctor, $request->get('patient'));
+        $booking = $bookingHelper->create($date, $doctorId, $request->get('patient'));
 
         /** @var AvailabilityApiClientInterface $availabilityApi */
         $availabilityApi = $this->get(AvailabilityApiClientInterface::class);
@@ -69,7 +60,7 @@ final class BookController extends Controller
 
         if ($bookingStatus === true) {
             $booking = new Booking;
-            $booking->setDoctor($doctor);
+            $booking->setDoctorId(Uuid::fromString($doctorId));
             $booking->setPatient($patient);
             $booking->setDate(new \DateTime($date));
             $em->getManager()->persist($booking);
@@ -81,7 +72,6 @@ final class BookController extends Controller
             $event->date = new \DateTime($date);
             $event->bookingId = $booking->getId();
             $event->doctorId = $doctorId;
-            $event->doctor = $doctor;
 
             $ed->dispatch($event);
 

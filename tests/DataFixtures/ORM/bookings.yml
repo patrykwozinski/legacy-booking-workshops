@@ -1,20 +1,12 @@
-App\Entity\Doctor:
-  doctor:
-    id: <(\Ramsey\Uuid\Uuid::fromString('deee497a-86ae-40a5-a840-8d9b5c57f778'))>
-    is_premium: true
-    is_active: true
-    email: '<email()>'
-    registered_at: <(new \DateTime())>
-
 App\Entity\Booking:
   past_booking:
     id: <(\Ramsey\Uuid\Uuid::uuid4())>
-    doctor: '@doctor'
+    doctorId: <(\Ramsey\Uuid\Uuid::fromString('deee497a-86ae-40a5-a840-8d9b5c57f778'))>
     patient: '<firstName()> <lastName()>'
     date: <dateTimeBetween('-30 days', '-1 day')>
 
   future_booking:
     id: <(\Ramsey\Uuid\Uuid::uuid4())>
-    doctor: '@doctor'
+    doctorId: <(\Ramsey\Uuid\Uuid::fromString('deee497a-86ae-40a5-a840-8d9b5c57f778'))>
     patient: '<firstName()> <lastName()>'
     date: <dateTimeBetween('+1 day', '+30 days')>

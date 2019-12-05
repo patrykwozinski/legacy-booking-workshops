@@ -3,23 +3,15 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\Entity\Doctor;
 use DateTime;
 
 class BookingHelper
 {
-    public function create(string $date, Doctor $doctor, ?string $patient): array
+    public function create(string $date, string $doctorId, ?string $patient): array
     {
         $errors = [];
         $date = new DateTime($date);
 
-        if (false === $doctor->getIsPremium()) {
-            $errors['notPremium'] = true;
-        }
-
-        if (false === $doctor->getIsActive()) {
-            $errors['notActive'] = true;
-        }
 
         if ($date < new DateTime('now')) {
             $errors['dateFromThePast'] = true;
@@ -31,7 +23,7 @@ class BookingHelper
 
         return array_merge(['ok' => true], [
             'date' => $date,
-            'doctor' => $doctor,
+            'doctorId' => $doctorId,
             'patient' => $patient,
         ]);
     }

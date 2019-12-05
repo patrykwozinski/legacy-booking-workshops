@@ -5,7 +5,6 @@ namespace App\Tests\Controller;
 
 
 use ApiTestCase\JsonApiTestCase;
-use App\Entity\Doctor;
 use Symfony\Component\HttpFoundation\Response;
 
 final class GetBookingsControllerTest extends JsonApiTestCase
@@ -15,11 +14,11 @@ final class GetBookingsControllerTest extends JsonApiTestCase
      */
     public function gets_existing_bookings_for_doctor(): void
     {
-        $fixtures = $this->loadFixturesFromFile('bookings.yml');
-        /** @var Doctor $doctor */
-        $doctor = $fixtures['doctor'];
+        $this->loadFixturesFromFile('bookings.yml');
 
-        $this->client->request('GET', $this->getBookingsUrl($doctor->getId()->toString()));
+        $doctorId = 'deee497a-86ae-40a5-a840-8d9b5c57f778';
+
+        $this->client->request('GET', $this->getBookingsUrl($doctorId));
 
         $response = $this->client->getResponse();
 

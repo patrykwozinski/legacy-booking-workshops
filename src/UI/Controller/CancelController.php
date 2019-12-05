@@ -46,7 +46,7 @@ class CancelController extends Controller
 
         $em->getManager()->remove($booking);
         $em->getManager()->flush();
-        $availabilityApi->cancelReservation(new SdkDoctor($booking->getDoctor()->getId()->toString()), $booking->getDate());
+        $availabilityApi->cancelReservation(new SdkDoctor($booking->getDoctorId()->toString()), $booking->getDate());
 
         return new JsonResponse([
             'message' => 'Booking was successfully canceled!',
