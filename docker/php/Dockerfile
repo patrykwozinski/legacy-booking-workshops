@@ -3,6 +3,8 @@ FROM mdobak/php-common-stack:7.3-fpm-alpine
 ARG uid
 ARG gid
 
+ENV PHP_IDE_CONFIG="serverName=booking"
+
 # Default user
 RUN    addgroup -g ${gid} -S app \
     && adduser -D -S -u ${uid} -g ${gid} -s /bin/bash app app \
@@ -50,8 +52,15 @@ RUN    addgroup -g ${gid} -S app \
         access_log=/dev/stdout \
         error_log=/dev/stderr \
         session.save_path=/tmp \
-    && echo 'alias sf="php /app/bin/console"' >> /root/.bashrc \
-    && echo 'alias sf="php /app/bin/console"' >> /home/app/.bashrc \
+# XDebug
+    && docker-pcs-php-ext-install xdebug \
+    && docker-pcs-php-ext-config xdebug \
+           xdebug.remote_enable=1 \
+           xdebug.remote_autostart=1 \
+           #xdebug.remote_host=172.17.0.1
+           xdebug.remote_host=docker.for.mac.localhost \
+    && docker-pcs-php-ext-disable xdebug \
+
 # Cleanup
     && chown app:app /app -R \
     && apk --no-cache --purge del \

@@ -158,6 +158,16 @@ function cmd_phpstan()
     cmd_compose exec -u app php ./vendor/phpstan/phpstan/bin/phpstan analyse src
 }
 
+function cmd_enxdebug()
+{
+    cmd_compose exec php docker-pcs-php-ext-enable xdebug
+}
+
+function cmd_disxdebug()
+{
+    cmd_compose exec php docker-pcs-php-ext-disable xdebug
+}
+
 function cmd_clean()
 {
     cmd_compose down
@@ -225,20 +235,26 @@ elif [[ ${MODE} == "test" ]]; then
     cmd_test
 elif [[ ${MODE} == "phpstan" ]]; then
     cmd_phpstan
+elif [[ ${MODE} == "enxdebug" ]]; then
+    cmd_enxdebug
+elif [[ ${MODE} == "disxdebug" ]]; then
+    cmd_disxdebug
 elif [[ ${MODE} == "clean" ]]; then
     cmd_clean
 elif [[ ${MODE} == "shell" ]]; then
     cmd_shell "$@"
 else
-    echo "Usage: $0 compose|start|stop|install|test|shell|clean"
+    echo "Usage: $0 compose|start|stop|install|test|phpstan|enxdebug|disxdebug|shell|clean"
     echo ""
     echo "Commands:"
-    echo "  compose        Wrapper for docker-compose commands"
-    echo "  start          Starts all or selected Docker containers"
-    echo "  stop           Stops all or selected Docker containers"
-    echo "  install        Installs application"
-    echo "  test           Runs tests"
-    echo "  phpstan        Runs PHPStan"
-    echo "  shell          Opens container's shell"
-    echo "  clean          Removes all images, containers and volumes associated with your project"
+    echo "  compose           Wrapper for docker-compose commands"
+    echo "  start             Starts all or selected Docker containers"
+    echo "  stop              Stops all or selected Docker containers"
+    echo "  install           Installs application"
+    echo "  test              Runs tests"
+    echo "  phpstan           Runs PHPStan"
+    echo "  enxdebug          Enables XDebug"
+    echo "  disxdebug         Disables xdebug"
+    echo "  shell             Opens container's shell"
+    echo "  clean             Removes all images, containers and volumes associated with your project"
 fi
