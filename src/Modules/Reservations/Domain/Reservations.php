@@ -1,9 +1,7 @@
 <?php
 
-namespace App\Modules\Shared\Domain;
+namespace App\Modules\Reservations\Domain;
 
-use App\Modules\Reservations\Domain\Reservation;
-use App\Modules\Reservations\Domain\ReservationId;
 
 interface Reservations
 {

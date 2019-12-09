@@ -4,4 +4,4 @@ framework:
             sync: 'sync://'
 
         routing:
-            '*': async
+            '*': sync

@@ -2,12 +2,10 @@
 
 namespace App\Modules\Reservations\Application\Command;
 
-use App\Modules\Reservations\Domain\Reservation;
 use App\Modules\Reservations\Domain\ReservationId;
+use App\Modules\Reservations\Domain\Reservations;
 use App\Modules\Shared\Application\Bus\CommandHandlerInterface;
 use App\Modules\Shared\Application\Bus\EventPublisher;
-use App\Modules\Shared\Domain\Reservations;
-use App\Modules\Shared\Domain\Uuid;
 
 class CancelReservationHandler implements CommandHandlerInterface
 {
