@@ -46,8 +46,7 @@ tasks:
       - type: "checkStatus"
         project: "@this"
         status:
-          - "Healthy"
-          - "Unhealthy"
+          - "Stopped"
 
   - task: "test"
     name: "Run tests"

@@ -142,6 +142,7 @@ function cmd_stop()
 function cmd_install()
 {
     cmd_start
+    sleep 10
     cmd_compose exec -u app php composer install
     cmd_compose exec -u app php ./bin/console doctrine:schema:update --force
     cmd_compose exec -u app php ./bin/console doctrine:fixtures:load -n
