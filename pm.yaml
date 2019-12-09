@@ -33,6 +33,38 @@ tasks:
           - "Healthy"
           - "Unhealthy"
 
+  - task: "install"
+    name: "Install/Update"
+    steps:
+      - step:
+          type: "exec"
+          command: |
+            set -e
+            ./console install
+          async: false
+    availableIf:
+      - type: "checkStatus"
+        project: "@this"
+        status:
+          - "Healthy"
+          - "Unhealthy"
+
+  - task: "test"
+    name: "Run tests"
+    steps:
+      - step:
+          type: "exec"
+          command: |
+            set -e
+            ./console test
+          async: false
+    availableIf:
+      - type: "checkStatus"
+        project: "@this"
+        status:
+          - "Healthy"
+          - "Unhealthy"
+
   - task: "shell"
     name: "Shell"
     steps:
