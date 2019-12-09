@@ -14,9 +14,11 @@ interface Availability
 
     /**
      * @param Uuid $doctorId
-     * @param DateTime $time
+     * @param DateTime $dateTime
      *
      * @throws CannotReserveException
      */
-    public function reserve(Uuid $doctorId, DateTIme $time): void;
+    public function reserve(Uuid $doctorId, DateTime $dateTime): void;
+
+    public function cancel(Uuid $doctorId, DateTime $dateTime): void;
 }

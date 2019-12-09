@@ -6,7 +6,6 @@ namespace App\Modules\Reservations\Infrastructure\SdkAvailability;
 
 use App\Modules\Reservations\Domain\Availability;
 use App\Modules\Reservations\Domain\CannotReserveException;
-use App\Modules\Reservations\Domain\ReservationResult;
 use App\Modules\Shared\Domain\Uuid;
 use App\SDK\AvailabilityApiClient\AvailabilityApiClientInterface;
 use App\SDK\AvailabilityApiClient\IO\Doctor as SdkDoctor;
@@ -24,23 +23,33 @@ final class SdkAvailability implements Availability
 
     public function isAvailable(Uuid $doctorId, DateTime $time): bool
     {
-        $availability = $this->apiClient->getAvailabilityInformation(new SdkDoctor((string)$doctorId), $time);
+        $availability = $this->apiClient->getAvailabilityInformation($this->doctor($doctorId), $time);
 
         return $availability->exists() && false === $availability->reserved();
     }
 
     /**
      * @param Uuid $doctorId
-     * @param DateTime $time
+     * @param DateTime $dateTime
      *
      * @throws CannotReserveException
      */
-    public function reserve(Uuid $doctorId, DateTime $time): void
+    public function reserve(Uuid $doctorId, DateTime $dateTime): void
     {
         try {
-            $this->apiClient->reserve(new SdkDoctor((string)$doctorId), $time);
+            $this->apiClient->reserve($this->doctor($doctorId), $dateTime);
         } catch (\Exception $exception) {
             throw CannotReserveException::forDoctor($doctorId);
         }
+    }
+
+    public function cancel(Uuid $doctorId, DateTime $dateTime): void
+    {
+        $this->apiClient->cancelReservation($this->doctor($doctorId), $dateTime);
+    }
+
+    private function doctor(Uuid $doctorId): SdkDoctor
+    {
+        return new SdkDoctor((string)$doctorId);
     }
 }
