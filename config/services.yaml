@@ -34,6 +34,10 @@ services:
     App\Service\BookingValidator:
         public: true
 
+    _instanceof:
+        App\Modules\Shared\Application\Bus\CommandHandlerInterface:
+            tags: [messenger.message_handler]
+
     App\Subscriber\EventSubscriber:
         tags:
             - { name: kernel.event_listener, event: "App\\Event\\BookedEvent", method: "onBookedEvent" }

@@ -6,6 +6,9 @@ namespace App\UI\Controller;
 
 use App\Entity\Booking;
 use App\Event\BookedEvent;
+use App\Modules\Reservations\Application\Command\CreateReservationCommand;
+use App\Modules\Reservations\Domain\DoctorNotAvailableException;
+use App\Modules\Shared\Application\Bus\CommandBusInterface;
 use App\SDK\AvailabilityApiClient\AvailabilityApiClientInterface;
 use App\SDK\AvailabilityApiClient\IO\Doctor as SdkDoctor;
 use App\Service\BookingHelper;
@@ -21,6 +24,14 @@ use Symfony\Component\Routing\Annotation\Route;
 
 final class BookController extends Controller
 {
+    /** @var CommandBusInterface */
+    private $commandBus;
+
+    public function __construct(CommandBusInterface $commandBus)
+    {
+        $this->commandBus = $commandBus;
+    }
+
     /**
      * @Route( "/book", methods={"POST"})
      */
@@ -29,6 +40,18 @@ final class BookController extends Controller
         $date = $request->get('date') ?? '';
         $doctorId = $request->get('doctor_id') ?? '';
         $patient = $request->get('patient') ?? '';
+        $reservationId = Uuid::uuid4()->toString();
+
+        try {
+            $this->commandBus->dispatch(new CreateReservationCommand($reservationId, $doctorId, $patient, $date));
+
+            return new JsonResponse([
+                'message' => 'Your reservation was booked',
+                'booking_id' => $reservationId,
+            ]);
+        } catch (\Exception $exception) {
+           // elo póki co na wszystko
+        }
 
         /** @var Registry $em */
         $em = $this->get('doctrine');

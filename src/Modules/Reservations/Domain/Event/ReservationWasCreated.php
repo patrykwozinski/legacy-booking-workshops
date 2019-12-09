@@ -3,8 +3,9 @@
 namespace App\Modules\Reservations\Domain\Event;
 
 use App\Modules\Reservations\Domain\ReservationId;
+use App\Modules\Shared\Domain\Bus\EventInterface;
 
-class ReservationWasCreated
+class ReservationWasCreated implements EventInterface
 {
 	/**
 	 * @var ReservationId

@@ -21,8 +21,7 @@ final class DoctrineReservations implements Reservations
 
     public function add(Reservation $reservation): void
     {
-        $this->entityManager->persist($reservation);
-        $this->entityManager->flush();
+        //
     }
 
     public function remove(Reservation $reservation): void

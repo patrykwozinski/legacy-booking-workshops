@@ -31,6 +31,10 @@ final class ReservationFactory
      */
     public function create(ReservationId $id, Uuid $doctorId, string $patient, DateTime $date): Reservation
     {
+        if ($date < new DateTime('now')) {
+            CannotReserveException::whenDateFromThePast($doctorId, $date);
+        }
+
         if (false === $this->availability->isAvailable($doctorId, $date)) {
             throw DoctorNotAvailableException::withId($doctorId);
         }

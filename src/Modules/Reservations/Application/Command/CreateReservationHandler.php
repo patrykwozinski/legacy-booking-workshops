@@ -12,6 +12,7 @@ use App\Modules\Reservations\Domain\Reservations;
 use App\Modules\Shared\Application\Bus\CommandHandlerInterface;
 use App\Modules\Shared\Application\Bus\EventPublisher;
 use App\Modules\Shared\Domain\Uuid;
+use DateTime;
 
 final class CreateReservationHandler implements CommandHandlerInterface
 {
@@ -47,7 +48,7 @@ final class CreateReservationHandler implements CommandHandlerInterface
             new ReservationId($command->getId()),
             new Uuid($command->getDoctorId()),
             $command->getPatient(),
-            new \DateTime($command->getDate())
+            new DateTime($command->getDate())
         );
 
         $this->reservations->add($reservation);
