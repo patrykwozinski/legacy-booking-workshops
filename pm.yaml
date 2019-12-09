@@ -1,0 +1,83 @@
+project: "Booking Demo"
+description: ""
+
+tasks:
+  - task: "start"
+    name: "Start"
+    steps:
+      - step:
+          type: "exec"
+          command: |
+            set -e
+            ./console start
+          async: false
+    availableIf:
+      - type: "checkStatus"
+        project: "@this"
+        status:
+          - "Stopped"
+
+  - task: "stop"
+    name: "Stop"
+    steps:
+      - step:
+          type: "exec"
+          command: |
+            set -e
+            ./console stop
+          async: false
+    availableIf:
+      - type: "checkStatus"
+        project: "@this"
+        status:
+          - "Healthy"
+          - "Unhealthy"
+
+  - task: "shell"
+    name: "Shell"
+    steps:
+      - step:
+          type: "runTask"
+          project: "@this"
+          task: "_shell"
+          environment:
+            COMMAND: "./console shell php"
+
+  - task: "_shell"
+    hidden: true
+    steps:
+      - step:
+          type: "exec"
+          command: |
+            osascript <<END
+            tell application "iTerm2"
+              activate
+              tell current window
+                create tab with default profile
+                tell the current session
+            	  write text "cd '$PWD'; ${COMMAND}"
+            	end tell
+              end tell
+            end tell
+            END
+          async: false
+
+healthchecks:
+  livenessProbe:
+    periodSeconds: 30
+    tests:
+      - type: "containerCheckStatus"
+        containers:
+          - symfony_php
+        status:
+          - "Starting"
+          - "Healthy"
+
+  healthinessProbe:
+    periodSeconds: 30
+    tests:
+      - type: "containerCheckStatus"
+        containers:
+          - symfony_php
+        status:
+          - "Healthy"
