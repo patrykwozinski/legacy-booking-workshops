@@ -7,7 +7,6 @@ namespace App\UI\Controller;
 use App\Entity\Booking;
 use App\Event\BookedEvent;
 use App\Modules\Reservations\Application\Command\CreateReservationCommand;
-use App\Modules\Reservations\Domain\DoctorNotAvailableException;
 use App\Modules\Shared\Application\Bus\CommandBusInterface;
 use App\SDK\AvailabilityApiClient\AvailabilityApiClientInterface;
 use App\SDK\AvailabilityApiClient\IO\Doctor as SdkDoctor;
